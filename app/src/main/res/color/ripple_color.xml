@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- state_checked в исходниках true, но тогда ripple происходит при снятии метки, а не при установке -->
+    <item android:state_checked="false"
+        android:state_enabled="true"
+        android:alpha="0.25"
+        android:color="?attr/colorControlActivated" />
+    <item android:color="?attr/colorControlHighlight" />
+</selector>
