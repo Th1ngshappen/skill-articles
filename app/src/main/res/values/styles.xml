@@ -27,6 +27,9 @@
         <item name="colorOnPrimary">@color/color_on_article_bar</item>
         <item name="colorSurface">@color/color_article_bar</item>
         <item name="colorControlNormal">@color/color_on_article_bar</item> <!-- Определяет цвет стрелки на кнопке Назад -->
+
+        <item name="android:editTextColor">@color/color_on_article_bar</item>
+        <item name="android:textColorHint">@color/color_gray</item>
     </style>
 
     <style name="ArticleToolbar" parent="Widget.MaterialComponents.Toolbar.Primary">

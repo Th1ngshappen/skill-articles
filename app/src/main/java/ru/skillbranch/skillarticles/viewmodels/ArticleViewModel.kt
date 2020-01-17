@@ -7,12 +7,10 @@ import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
 import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
-import ru.skillbranch.skillarticles.extensions.mutableLiveData
 
 class ArticleViewModel(private val articleId: String) :
     BaseViewModel<ArticleState>(ArticleState()), IArticleViewModel {
 
-    private val query = mutableLiveData("")
     private val repository = ArticleRepository
 
     init {
@@ -31,6 +29,9 @@ class ArticleViewModel(private val articleId: String) :
         }
 
         subscribeOnDataSource(getArticleContent()) { content, state ->
+            // В лямбде обычный return не работает, он заставит выйти из функции, в которой лямбда вызвана.
+            // Чтобы выйти из лямбды, после return ставят метку - @lambda, указывающую на нужную лямбду
+
             content ?: return@subscribeOnDataSource null
             state.copy(
                 isLoadingContent = false,
@@ -51,7 +52,6 @@ class ArticleViewModel(private val articleId: String) :
         // модифицировать не придётся - модификация будет происходить на уровне репозитория
         // ~01:13:20 лекции Архитектура приложения. Coordinator layout
         subscribeOnDataSource(repository.getAppSettings()) { settings, state ->
-            settings
             state.copy(
                 isDarkMode = settings.isDarkMode,
                 isBigText = settings.isBigText
@@ -133,12 +133,12 @@ class ArticleViewModel(private val articleId: String) :
     }
 
     override fun handleSearchMode(isSearch: Boolean) {
-
+        if (isSearch == currentState.isSearch) return
+        updateState { it.copy(isSearch = isSearch) }
     }
 
     override fun handleSearch(query: String?) {
-        val msg = "Searching is not implemented"
-        notify(Notify.ErrorMessage(msg, "OK", null))
+        updateState { it.copy(searchQuery = query) }
     }
 
 }
