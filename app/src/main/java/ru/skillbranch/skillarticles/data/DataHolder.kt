@@ -99,13 +99,6 @@ data class AppSettings(
     val isBigText: Boolean = false
 )
 
-data class SearchInfo(
-    val isSearch: Boolean = false,
-    val searchQuery: String? = null,
-    val searchResults: List<Pair<Int, Int>> = emptyList(),
-    val searchPosition: Int = 0
-)
-
 val longText: String = """
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas nibh sapien, consectetur et ultrices quis, convallis sit amet augue. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vestibulum et convallis augue, eu hendrerit diam. Curabitur ut dolor at justo suscipit commodo. Curabitur consectetur, massa sed sodales sollicitudin, orci augue maximus lacus, ut elementum risus lorem nec tellus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent accumsan tempor lorem, quis pulvinar justo. Vivamus euismod risus ac arcu pharetra fringilla.
 

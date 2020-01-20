@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.extensions.data.toSearchInfo
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.viewmodels.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
@@ -51,13 +50,13 @@ class RootActivity : AppCompatActivity() {
         searchView.queryHint = "Search"
 
 
-        val (_, searchQuery) = viewModel.currentState.toSearchInfo()
-
-        if (searchQuery.isNullOrEmpty().not()){
+        val searchQuery = viewModel.currentState.searchQuery
+        if (searchQuery.isNullOrEmpty().not()) {
             searchItem.expandActionView()
             searchView.setQuery(searchQuery, false)
             searchView.clearFocus()
         }
+
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
