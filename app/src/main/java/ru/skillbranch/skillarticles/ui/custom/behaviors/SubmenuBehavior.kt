@@ -1,68 +1,37 @@
 package ru.skillbranch.skillarticles.ui.custom.behaviors
 
-import android.content.Context
-import android.util.AttributeSet
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
+import androidx.core.view.marginRight
 import ru.skillbranch.skillarticles.ui.custom.ArticleSubmenu
+import ru.skillbranch.skillarticles.ui.custom.Bottombar
 
-class SubmenuBehavior : CoordinatorLayout.Behavior<ArticleSubmenu> {
+class SubmenuBehavior : CoordinatorLayout.Behavior<ArticleSubmenu>() {
 
-    companion object {
-        private const val STATE_SCROLLED_NONE = 0
-        private const val STATE_SCROLLED_DOWN = 1
-        private const val STATE_SCROLLED_UP = 2
-    }
-
-    private var currentState = STATE_SCROLLED_NONE
-
-    constructor() : super()
-
-    constructor(
-        context: Context,
-        attrs: AttributeSet
-    ) : super(context, attrs)
-
-    override fun onStartNestedScroll(
-        coordinatorLayout: CoordinatorLayout,
+    // set view as dependent on bottombar
+    override fun layoutDependsOn(
+        parent: CoordinatorLayout,
         child: ArticleSubmenu,
-        directTargetChild: View,
-        target: View,
-        axes: Int,
-        type: Int
+        dependency: View
     ): Boolean {
-        return axes == ViewCompat.SCROLL_AXIS_VERTICAL
+        return dependency is Bottombar
     }
 
-    override fun onNestedScroll(
-        coordinatorLayout: CoordinatorLayout,
+    // will be called if dependent view has been changed
+    override fun onDependentViewChanged(
+        parent: CoordinatorLayout,
         child: ArticleSubmenu,
-        target: View,
-        dxConsumed: Int,
-        dyConsumed: Int,
-        dxUnconsumed: Int,
-        dyUnconsumed: Int
-    ) {
-        if (dyConsumed > 0) {
-            slideDown(child)
-        } else if (dyConsumed < 0) {
-            slideUp(child)
-        }
+        dependency: View
+    ): Boolean {
+        return if (child.isOpen && dependency is Bottombar && dependency.translationY >= 0f) {
+            animate(child, dependency)
+            true
+        } else false
     }
 
-    private fun slideUp(submenu: ArticleSubmenu) {
-        if (currentState == STATE_SCROLLED_UP) return
-        currentState = STATE_SCROLLED_UP
-
-        if (submenu.isOpen.not()) return
-
+    private fun animate(child: ArticleSubmenu, dependency: View) {
+        val fraction = dependency.translationY / dependency.height
+        child.translationX = (child.width + child.marginRight) * fraction
     }
 
-    private fun slideDown(submenu: ArticleSubmenu) {
-        if (currentState == STATE_SCROLLED_DOWN) return
-        currentState = STATE_SCROLLED_DOWN
-
-        if (submenu.isOpen.not()) return
-    }
 }

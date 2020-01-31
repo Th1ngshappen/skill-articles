@@ -8,5 +8,5 @@
         android:icon="@drawable/ic_search_black_24dp"
         android:title="@string/menu_search_title"
         app:actionLayout="@layout/search_view_layout"
-        app:showAsAction="ifRoom|collapseActionView" />
+        app:showAsAction="always|collapseActionView" />
 </menu>
