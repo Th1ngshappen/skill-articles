@@ -83,7 +83,7 @@ class Bottombar @JvmOverloads constructor(
             btn_result_up.isEnabled = false
             btn_result_down.isEnabled = false
         } else {
-            tv_search_result.text = "${position.inc()} from $searchCount"
+            tv_search_result.text = "${position.inc()} of $searchCount"
             btn_result_up.isEnabled = position > 0
             btn_result_down.isEnabled = position < searchCount.dec()
         }

@@ -58,7 +58,6 @@ object LocalDataHolder {
     fun clearData(){
         articleInfo.postValue(null)
         articleData.postValue(null)
-        settings.postValue(AppSettings())
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)

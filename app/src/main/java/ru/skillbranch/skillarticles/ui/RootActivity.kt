@@ -5,6 +5,7 @@ import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
@@ -21,6 +22,7 @@ import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
 import kotlinx.android.synthetic.main.search_view_layout.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
@@ -32,9 +34,7 @@ import ru.skillbranch.skillarticles.ui.delegates.ObserveProp
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
 import ru.skillbranch.skillarticles.viewmodels.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
-import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
-import ru.skillbranch.skillarticles.viewmodels.base.ViewModelFactory
-import ru.skillbranch.skillarticles.viewmodels.base.Notify
+import ru.skillbranch.skillarticles.viewmodels.base.*
 
 class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
 
@@ -55,6 +55,20 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         setupToolbar()
         setupBottombar()
         setupSubmenu()
+
+        testHere()
+    }
+
+    val vm: ArticleViewModel by provideViewModel("test args")
+
+    private fun testHere() {
+        //val prefManager = PrefManager(this)
+        //prefManager.clearAll()
+        //Log.d("M_RootActivity","storedBoolean: ${prefManager.storedString}")
+        //prefManager.storedString = "hello"
+        //Log.d("M_RootActivity","storedBoolean: ${prefManager.storedString}")
+
+        //Log.d("M_RootActivity","articleId: ${vm.articleId}")
     }
 
     override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
