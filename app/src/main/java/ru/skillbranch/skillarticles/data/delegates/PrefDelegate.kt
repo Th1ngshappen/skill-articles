@@ -4,34 +4,53 @@ import ru.skillbranch.skillarticles.data.local.PrefManager
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class PrefDelegate<T>(private val defaultValue: T) : ReadWriteProperty<PrefManager, T?> {
+class PrefDelegate<T>(private val defaultValue: T)  {
 
-    override fun getValue(thisRef: PrefManager, property: KProperty<*>): T? {
+    private var storedValue: T? = null
 
-        return when (defaultValue) {
-            is Boolean -> thisRef.preferences.getBoolean(property.name, defaultValue) as T
-            is String -> thisRef.preferences.getString(property.name, defaultValue) as T
-            is Float -> thisRef.preferences.getFloat(property.name, defaultValue) as T
-            is Int -> thisRef.preferences.getInt(property.name, defaultValue) as T
-            is Long -> thisRef.preferences.getLong(property.name, defaultValue) as T
-            else -> throw IllegalArgumentException("Only primitives types can be stored in Shared Preferences")
-        }
-    }
+    operator fun provideDelegate(
+        thisRef: PrefManager,
+        property: KProperty<*>
+    ): ReadWriteProperty<PrefManager, T?> {
 
-    override fun setValue(thisRef: PrefManager, property: KProperty<*>, value: T?) {
+        val key = property.name
+        return object : ReadWriteProperty<PrefManager, T?> {
 
-        with(thisRef.preferences.edit()) {
-
-            val key = property.name
-            when (value) {
-                is Boolean -> putBoolean(key, value)
-                is String -> putString(key, value)
-                is Float -> putFloat(key, value)
-                is Int -> putInt(key, value)
-                is Long -> putLong(key, value)
-                else -> throw IllegalArgumentException("Only primitives types can be stored in Shared Preferences")
+            override fun getValue(thisRef: PrefManager, property: KProperty<*>): T? {
+                if (storedValue == null) {
+                    @Suppress("UNCHECKED_CAST")
+                    storedValue = when (defaultValue) {
+                        is Boolean -> thisRef.preferences.getBoolean(key, defaultValue) as T
+                        is String -> thisRef.preferences.getString(key, defaultValue) as T
+                        is Float -> thisRef.preferences.getFloat(key, defaultValue) as T
+                        is Int -> thisRef.preferences.getInt(key, defaultValue) as T
+                        is Long -> thisRef.preferences.getLong(key, defaultValue) as T
+                        else -> throw IllegalArgumentException("Only primitives types can be stored in Shared Preferences")
+                    }
+                }
+                return storedValue
             }
-            apply()
+
+
+            override fun setValue(thisRef: PrefManager, property: KProperty<*>, value: T?) {
+
+                with(thisRef.preferences.edit()) {
+                    when (value) {
+                        is Boolean -> putBoolean(key, value)
+                        is String -> putString(key, value)
+                        is Float -> putFloat(key, value)
+                        is Int -> putInt(key, value)
+                        is Long -> putLong(key, value)
+                        else -> throw IllegalArgumentException("Only primitives types can be stored in Shared Preferences")
+                    }
+                    apply()
+                }
+                storedValue = value
+            }
+
         }
+
     }
+
+
 }

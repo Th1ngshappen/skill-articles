@@ -23,11 +23,11 @@ abstract class Binding {
     // таким образом, когда свойство этого делегата будет изменено,
     // будет вызван обработчик onChange,
     // в который будет переданы все текущие значения наблюдаемых полей из мапы delegates
-    fun <A, B, C, D> dependsOn(
+    fun <A, B, C> dependsOn(
         vararg fields: KProperty<*>,
-        onChange: (A, B, C, D) -> Unit
+        onChange: (A, B, C) -> Unit
     ) {
-        check(fields.size == 4) { "Names size must be 4, current ${fields.size}" }
+        check(fields.size == 3) { "Names size must be 3, current ${fields.size}" }
         val names = fields.map { it.name }
 
         names.forEach {
@@ -35,8 +35,7 @@ abstract class Binding {
                 onChange(
                     delegates[names[0]]?.value as A,
                     delegates[names[1]]?.value as B,
-                    delegates[names[2]]?.value as C,
-                    delegates[names[3]]?.value as D
+                    delegates[names[2]]?.value as C
                 )
             }
         }

@@ -2,24 +2,21 @@ package ru.skillbranch.skillarticles.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import ru.skillbranch.skillarticles.data.delegates.PrefDelegate
 
 
 class PrefManager(context: Context) {
 
+    internal val preferences: SharedPreferences by lazy { PreferenceManager(context).sharedPreferences }
+
     var storedBoolean by PrefDelegate(false)
     var storedString by PrefDelegate("")
     var storedFloat by PrefDelegate(0f)
-    var storedInt by PrefDelegate(0)
-    var storedLong by PrefDelegate(0)
+    var storedInt by PrefDelegate(Int.MAX_VALUE)
+    var storedLong by PrefDelegate(Long.MAX_VALUE)
 
-    val preferences: SharedPreferences by lazy {
-        PreferenceManager.getDefaultSharedPreferences(context)
-    }
-
-    fun clearAll(): Unit = with(preferences.edit()) {
-        clear()
-        apply()
+    fun clearAll() {
+        preferences.edit().clear().apply()
     }
 }

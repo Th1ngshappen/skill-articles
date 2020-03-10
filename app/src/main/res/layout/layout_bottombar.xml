@@ -86,15 +86,15 @@
             android:layout_weight="1" />
 
         <ImageView
-            android:id="@+id/btn_result_down"
-            style="@style/BottombarSearchIcon"
-            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
-            tools:tint="@android:color/white" />
-
-        <ImageView
             android:id="@+id/btn_result_up"
             style="@style/BottombarSearchIcon"
             android:src="@drawable/ic_keyboard_arrow_up_black_24dp"
+            tools:tint="@android:color/white" />
+
+        <ImageView
+            android:id="@+id/btn_result_down"
+            style="@style/BottombarSearchIcon"
+            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
             tools:tint="@android:color/white" />
 
     </LinearLayout>

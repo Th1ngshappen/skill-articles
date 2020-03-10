@@ -5,7 +5,6 @@ import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.method.ScrollingMovementMethod
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
@@ -22,7 +21,6 @@ import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
 import kotlinx.android.synthetic.main.search_view_layout.*
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
@@ -39,10 +37,9 @@ import ru.skillbranch.skillarticles.viewmodels.base.*
 class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
 
     override val layout: Int = R.layout.activity_root
-    override val viewModel: ArticleViewModel by lazy {
-        val vmFactory = ViewModelFactory("0")
-        ViewModelProviders.of(this, vmFactory).get(ArticleViewModel::class.java)
-    }
+
+    override val viewModel by provideViewModel<ArticleViewModel>("0")
+
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override val binding: ArticleBinding by lazy { ArticleBinding() }
 
@@ -55,20 +52,6 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         setupToolbar()
         setupBottombar()
         setupSubmenu()
-
-        testHere()
-    }
-
-    val vm: ArticleViewModel by provideViewModel("test args")
-
-    private fun testHere() {
-        //val prefManager = PrefManager(this)
-        //prefManager.clearAll()
-        //Log.d("M_RootActivity","storedBoolean: ${prefManager.storedString}")
-        //prefManager.storedString = "hello"
-        //Log.d("M_RootActivity","storedBoolean: ${prefManager.storedString}")
-
-        //Log.d("M_RootActivity","articleId: ${vm.articleId}")
     }
 
     override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
@@ -84,19 +67,22 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
                 SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-
-        // scroll to first searched element
-        renderSearchPosition(0)
     }
 
     override fun renderSearchPosition(searchPosition: Int) {
+
         val content = tv_text_content.text as Spannable
 
+        // get all spans including focused
         val spans = content.getSpans<SearchSpan>()
+
+        // remove focused span from content
         content.getSpans<SearchFocusSpan>().forEach { content.removeSpan(it) }
 
         if (spans.isNotEmpty()) {
-            val result = spans[searchPosition]
+            val result = spans.getOrNull(searchPosition)
+            result ?: return
+            // scroll to selection
             Selection.setSelection(content, content.getSpanStart(result))
             content.setSpan(
                 SearchFocusSpan(bgColor, fgColor),
@@ -140,6 +126,8 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
             override fun onQueryTextSubmit(query: String?): Boolean {
+                // убираем фокус с search_view, чтобы клавиатура скрылась
+                if (search_view.hasFocus()) search_view.clearFocus()
                 viewModel.handleSearch(query)
                 return true
             }
@@ -211,11 +199,13 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         btn_result_up.setOnClickListener {
             // убираем фокус с search_view, чтобы клавиатура скрылась
             if (search_view.hasFocus()) search_view.clearFocus()
+            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
             viewModel.handleUpResult()
         }
 
         btn_result_down.setOnClickListener {
             if (search_view.hasFocus()) search_view.clearFocus()
+            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
             viewModel.handleDownResult()
         }
 
@@ -241,7 +231,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
     }
 
     // inner class - имеет доступ ко всем методам и свойствам своего outer класса
-    inner class ArticleBinding() : Binding() {
+    inner class ArticleBinding : Binding() {
 
         // чтобы клавиатура тоже восстанавливала своё состояние, когда мы находимся в режиме поиска
         var isFocusedSearch: Boolean = false
@@ -278,12 +268,16 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
                 if (it) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         }
 
+        private var searchPosition: Int by RenderProp(0, false) {
+            renderSearchPosition(it)
+            bottombar.bindSearchInfo(searchResults.size, searchPosition)
+        }
+
         var isSearch: Boolean by ObserveProp(false) {
             if (it) showSearchBar() else hideSearchBar()
         }
 
         private var searchResults: List<Pair<Int, Int>> by ObserveProp(emptyList())
-        private var searchPosition: Int by ObserveProp(0)
 
         private var content: String by ObserveProp("loading") {
             tv_text_content.setText(it, TextView.BufferType.SPANNABLE)
@@ -291,23 +285,22 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         }
 
         override fun onFinishInflate() {
-            dependsOn<Boolean, Boolean, List<Pair<Int, Int>>, Int>(
+            dependsOn<Boolean, Boolean, List<Pair<Int, Int>>>(
                 // обращение именно к полю - это двойное двоеточие и название поля
                 ::isLoadingContent,
                 ::isSearch,
-                ::searchResults,
-                ::searchPosition
-            ) { ilc, iss, sr, sp ->
+                ::searchResults
+            ) { ilc, iss, sr ->
 
                 if (!ilc && iss) {
                     renderSearchResult(sr)
-                    renderSearchPosition(sp)
+                    renderSearchPosition(searchPosition)
                 }
                 if (!ilc && !iss) {
                     clearSearchResult()
                 }
 
-                bottombar.bindSearchInfo(sr.size, sp)
+                bottombar.bindSearchInfo(sr.size, searchPosition)
             }
         }
 
@@ -323,7 +316,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (data.title != null) title = data.title
             if (data.category != null) category = data.category
             if (data.categoryIcon != null) categoryIcon = data.categoryIcon as Int
-            if (data.content.isNotEmpty()) content = data.content.first() as String
+            if (data.content != null) content = data.content
 
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch

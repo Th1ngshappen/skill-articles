@@ -1,7 +1,6 @@
 package ru.skillbranch.skillarticles.viewmodels
 
 import android.os.Bundle
-import android.util.Log
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import ru.skillbranch.skillarticles.data.ArticleData
@@ -67,7 +66,7 @@ class ArticleViewModel(private val articleId: String) :
     }
 
     // load text from network
-    override fun getArticleContent(): LiveData<List<Any>?> {
+    override fun getArticleContent(): LiveData<String?> {
         return repository.loadArticleContent(articleId)
     }
 
@@ -144,11 +143,54 @@ class ArticleViewModel(private val articleId: String) :
         updateState { it.copy(isSearch = isSearch, isShowMenu = false, searchPosition = 0) }
     }
 
+    // 50 минута мастер-класса
     override fun handleSearch(query: String?) {
         query ?: return
-        val result = (currentState.content.firstOrNull() as? String).indexesOf(query)
+        val result = currentState.content
+            .indexesOf(query)
             .map { it to it + query.length }
-        updateState { it.copy(searchQuery = query, searchResults = result) }
+
+        val position = with(currentState) {
+
+            if (result.isEmpty()) 0
+            else {
+
+                val shifted = if ((searchResults.isEmpty() || searchQuery.isNullOrEmpty() || query.isEmpty())) -1 else {
+                    // was 'uer' now 'query', shift = -1
+                    val newContainsOld = query.indexOf(searchQuery)
+                    // was 'query' now 'uer', shift = 1
+                    val oldContainsNew = searchQuery.indexOf(query)
+
+                    when {
+                        newContainsOld >= 0 -> {
+                            val index = searchResults[searchPosition].first + newContainsOld
+                            result.indexOfFirst { it.first == index }
+                        }
+                        oldContainsNew >= 0 -> {
+                            val index = searchResults[searchPosition].first - oldContainsNew
+                            result.indexOfFirst { it.first == index }
+                        }
+                        else -> -1
+                    }
+                }
+
+                when {
+                    shifted >= 0 -> shifted
+                    searchPosition > result.lastIndex -> result.lastIndex
+                    else -> searchPosition
+                }
+
+            }
+
+        }
+
+        updateState {
+            it.copy(
+                searchQuery = query,
+                searchResults = result,
+                searchPosition = position
+            )
+        }
     }
 
     fun handleUpResult() {
@@ -160,13 +202,6 @@ class ArticleViewModel(private val articleId: String) :
     }
 
 }
-
-// в терминале:
-// adb shell
-// ps
-// выводятся все процессы
-// ps | grep ru (| - это pipe)
-// kill -1 pid (pid - идентификатор процесса)
 
 data class ArticleState(
     val isAuth: Boolean = false, // пользователь авторизован
@@ -188,7 +223,7 @@ data class ArticleState(
     val date: String? = null,
     val author: Any? = null,
     val poster: String? = null,
-    val content: List<Any> = emptyList(), // контент
+    val content: String? = null, // контент
     val reviews: List<Any> = emptyList() // комментарии
 ) : IViewModelState {
 

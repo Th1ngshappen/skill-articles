@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
-import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 
 abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
 
@@ -111,21 +110,23 @@ class EventObserver<E>(private val onEventUnhandledContent: (E) -> Unit) : Obser
 
 // концепция sealed классов в kotlin очень похожа на enum, только они могут сохранять внутри себя какое-то состояине,
 // то есть хранить внутри экземпляры, поэтому их удобно применять в when конструкции
-sealed class Notify(val message: String) {
+sealed class Notify() {
     // data class'ы не оддерживают наследование, могут только реализовывать интерфейсы,
     // исключение - если они являются подклассами sealed класса
 
-    data class TextMessage(val msg: String) : Notify(msg)
+    abstract val message: String
+
+    data class TextMessage(override val message: String) : Notify()
 
     data class ActionMessage(
-        val msg: String,
+        override val message: String,
         val actionLabel: String,
         val actionHandler: (() -> Unit)
-    ) : Notify(msg)
+    ) : Notify()
 
     data class ErrorMessage(
-        val msg: String,
+        override val message: String,
         val errLabel: String,
         val errHandler: (() -> Unit)?
-    ) : Notify(msg)
+    ) : Notify()
 }
