@@ -10,6 +10,7 @@ import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
+import ru.skillbranch.skillarticles.markdown.MarkdownParser
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
@@ -18,6 +19,7 @@ class ArticleViewModel(private val articleId: String) :
     BaseViewModel<ArticleState>(ArticleState()), IArticleViewModel {
 
     private val repository = ArticleRepository
+    private var clearContent: String? = null
 
     init {
         // subscribe to mutable data
@@ -146,7 +148,9 @@ class ArticleViewModel(private val articleId: String) :
     // 50 минута мастер-класса
     override fun handleSearch(query: String?) {
         query ?: return
-        val result = currentState.content
+
+        if (clearContent == null) clearContent = MarkdownParser.clear(currentState.content)
+        val result = clearContent
             .indexesOf(query)
             .map { it to it + query.length }
 
@@ -154,7 +158,7 @@ class ArticleViewModel(private val articleId: String) :
 
             if (result.isEmpty()) 0
             else {
-
+                // save the same visual position if the result overlaps with the previous query
                 val shifted = if ((searchResults.isEmpty() || searchQuery.isNullOrEmpty() || query.isEmpty())) -1 else {
                     // was 'uer' now 'query', shift = -1
                     val newContainsOld = query.indexOf(searchQuery)
