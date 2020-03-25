@@ -98,11 +98,8 @@ class IconLinkSpan(
 
     private inline fun Paint.forText(block: () -> Unit) {
         val oldColor = color
-
         color = textColor
-
         block()
-
         color = oldColor
     }
 

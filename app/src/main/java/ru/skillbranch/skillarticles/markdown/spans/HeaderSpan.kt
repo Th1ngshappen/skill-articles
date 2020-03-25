@@ -65,8 +65,8 @@ class HeaderSpan constructor(
 
         // line break добавляет 1 символ, поэтому .dec()
         if (spanEnd == end.dec()) {
-            val originHeiht = fm.descent - originAscent
-            fm.descent = (originHeiht * linePadding + marginBottom).toInt()
+            val originHeight = fm.descent - originAscent
+            fm.descent = (originHeight * linePadding + marginBottom).toInt()
         }
 
         fm.top = fm.ascent
@@ -113,12 +113,12 @@ class HeaderSpan constructor(
             }
         }
 
-//        if (level in 1..2) {
-//            val oldSize = paint.textSize
-//            paint.textSize *= sizes[level]!!
-//            canvas.drawFontLines(lineTop,lineBottom, lineBaseline, paint)
-//            paint.textSize = oldSize
-//        }
+        // if (level in 1..2) {
+        //    val oldSize = paint.textSize
+        //    paint.textSize *= sizes[level]!!
+        //    canvas.drawFontLines(lineTop,lineBottom, lineBaseline, paint)
+        //    paint.textSize = oldSize
+        //
     }
 
     override fun getLeadingMargin(first: Boolean): Int {

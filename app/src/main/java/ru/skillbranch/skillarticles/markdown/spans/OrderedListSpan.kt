@@ -21,8 +21,7 @@ class OrderedListSpan(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 
     override fun getLeadingMargin(first: Boolean): Int {
-        //TODO implement me()
-        return 0
+        return (order.length.inc() * gapWidth).toInt()
     }
 
     override fun drawLeadingMargin(
@@ -30,6 +29,23 @@ class OrderedListSpan(
         lineTop: Int, lineBaseline: Int, lineBottom: Int, text: CharSequence?, lineStart: Int,
         lineEnd: Int, isFirstLine: Boolean, layout: Layout?
     ) {
-        //TODO implement me()
+        if (isFirstLine) {
+            paint.forText {
+                canvas.drawText(
+                    order,
+                    gapWidth + currentMarginLocation,
+                    lineBaseline.toFloat(),
+                    paint
+                )
+            }
+
+        }
+    }
+
+    private inline fun Paint.forText(block: () -> Unit) {
+        val oldColor = color
+        color = orderColor
+        block()
+        color = oldColor
     }
 }

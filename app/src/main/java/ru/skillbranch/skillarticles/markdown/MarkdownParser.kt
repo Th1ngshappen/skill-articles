@@ -17,17 +17,16 @@ object MarkdownParser {
     private const val BOLD_GROUP =
         "((?<!\\*)\\*{2}[^*].*?\\*{2}(?!\\*)|(?<!_)_{2}[^_].*?_{2}(?!_))"
     private const val STRIKE_GROUP = "((?<!~)~{2}[^~].*?~{2}(?!~))"
-    private const val RULE_GROUP = "(^[*]{3}|[-]{3}|[_]{3}\$)"
+    private const val RULE_GROUP = "(^[*]{3}|[-]{3}|[_]{3}$)"
     private const val INLINE_GROUP = "((?<!`)`[^`\\s].*?`(?!`))"
     private const val LINK_GROUP = "(\\[[^\\[\\]]*?\\]\\(.+?\\)|^\\[.*?]\\(.*?\\))"
-    private const val BLOCK_CODE_GROUP = "" // TODO implement me
-    private const val ORDER_LIST_GROUP = "" // TODO implement me
+    private const val BLOCK_CODE_GROUP = "(^```[^\\r]+?```\$)"
+    private const val ORDER_LIST_GROUP = "(^\\d\\. .+$)"
 
     // result regex
-    private const val MARKDOWN_GROUPS = "$UNORDERED_LIST_ITEM_GROUP|$HEADER_GROUP|$QUOTE_GROUP" +
-            "|$ITALIC_GROUP|$BOLD_GROUP|$STRIKE_GROUP|$RULE_GROUP|$INLINE_GROUP|$LINK_GROUP"
-    //
-    // |$BLOCK_CODE_GROUP|$ORDER_LIST_GROUP optionally
+    private const val MARKDOWN_GROUPS =
+        "$UNORDERED_LIST_ITEM_GROUP|$HEADER_GROUP|$QUOTE_GROUP|$ITALIC_GROUP|$BOLD_GROUP" +
+            "|$STRIKE_GROUP|$RULE_GROUP|$INLINE_GROUP|$LINK_GROUP|$BLOCK_CODE_GROUP|$ORDER_LIST_GROUP"
 
     private val elementsPattern by lazy { Pattern.compile(MARKDOWN_GROUPS, Pattern.MULTILINE) }
 
@@ -40,12 +39,22 @@ object MarkdownParser {
         return MarkdownText(elements)
     }
 
+    private fun List<Element>.toClearString(): String {
+        return buildString {
+            this@toClearString.forEach { el ->
+                if (el.elements.isEmpty()) append(el.text)
+                else append(el.elements.toClearString())
+            }
+        }
+    }
+
     /**
      * clear markdown text to string without markdown characters
      * возвращает строку, очищенную от маркдаунов (нужно для дальнейшего поиска в ней)
      */
     fun clear(string: String?): String? {
-        return null // TODO(hometask_5)
+        string ?: return null
+        return findElements(string).toClearString()
     }
 
     /**
@@ -70,12 +79,8 @@ object MarkdownParser {
             // found text
             var text: CharSequence
 
-            // group range for iterate by groups
-            val groups = 1..9
-
-            // TODO implement me
             // groups range for iterate by groups (1..9) or (1..11) optionally
-            // val groups = 1..11
+            val groups = 1..11
 
             var group = -1
             for (gr in groups) {
@@ -210,12 +215,43 @@ object MarkdownParser {
                 }
                 // 10 -> BLOCK CODE - optionally
                 10 -> {
-                    // TODO implement me
+                    // text without "```{}```"
+                    text = string.subSequence(startIndex.plus(3), endIndex.plus(-3))
+
+                    val lines = text.split("\n")
+                    if (lines.size == 1) {
+                        val element = Element.BlockCode(Element.BlockCode.Type.SINGLE, lines.first())
+                        parents.add(element)
+                    }
+                    else {
+                        for (ind in lines.indices) {
+                            val line = lines[ind]
+                            val element = when (ind) {
+                                0 -> Element.BlockCode(Element.BlockCode.Type.START, line + LINE_SEPARATOR)
+                                lines.lastIndex -> Element.BlockCode(Element.BlockCode.Type.END, line)
+                                else -> Element.BlockCode(Element.BlockCode.Type.MIDDLE, line + LINE_SEPARATOR)
+                            }
+                            parents.add(element)
+                        }
+                    }
+
+                    lastStartIndex = endIndex
                 }
 
                 // 11 -> NUMERIC LIST
                 11 -> {
-                    // TODO implement me
+                    val order = string.subSequence(startIndex, startIndex + 2).toString()
+
+                    // текст без маркера списка
+                    text = string.subSequence(startIndex.plus(3), endIndex)
+
+                    // find inner elements
+                    val subs = findElements(text)
+                    val element = Element.OrderedListItem(order, text, subs)
+                    parents.add(element)
+
+                    // next find start from position "end index" (last regex character)
+                    lastStartIndex = endIndex
                 }
             }
         }
