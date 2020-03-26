@@ -1,11 +1,11 @@
-package ru.skillbranch.skillarticles.markdown.spans
+package ru.skillbranch.skillarticles.ui.custom.spans
 
 import android.graphics.*
 import android.text.style.ReplacementSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
-import ru.skillbranch.skillarticles.markdown.Element
+import ru.skillbranch.skillarticles.data.repositories.Element
 
 
 class BlockCodeSpan(
@@ -81,6 +81,7 @@ class BlockCodeSpan(
         paint.forText {
             canvas.drawText(text, start, end, x + padding, y.toFloat(), paint)
         }
+
     }
 
     override fun getSize(
@@ -118,6 +119,9 @@ class BlockCodeSpan(
             }
         }
 
+        fm.top = fm.ascent
+        fm.bottom = fm.descent
+
         return 0
     }
 
@@ -152,4 +156,5 @@ class BlockCodeSpan(
         color = oldColor
         style = oldStyle
     }
+
 }
