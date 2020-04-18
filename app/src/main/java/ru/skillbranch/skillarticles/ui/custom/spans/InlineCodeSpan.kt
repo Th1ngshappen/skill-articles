@@ -17,7 +17,7 @@ class InlineCodeSpan(
     @Px
     private val cornerRadius: Float,
     @Px
-    private val padding: Float
+    val padding: Float
 ) : ReplacementSpan() {
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var rect: RectF = RectF()

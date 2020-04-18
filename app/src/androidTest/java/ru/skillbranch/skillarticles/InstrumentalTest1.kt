@@ -4,7 +4,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.SpannableString
-import android.util.Log
 import android.widget.TextView
 import androidx.core.text.buildSpannedString
 import androidx.core.view.setPadding
@@ -183,7 +182,6 @@ class InstrumentalTest1 {
         )
         inOrder.verify(mockDrawable).draw(any())
     }
-
 
 
     @Test

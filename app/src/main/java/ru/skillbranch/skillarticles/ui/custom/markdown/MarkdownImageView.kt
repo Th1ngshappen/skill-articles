@@ -31,7 +31,7 @@ import kotlin.math.hypot
 // вью группа, которая будет в себе содержать изображение, title изображения и элемент, который
 // будет хранить в себе описание этого изображения
 
-// suppres, потому что наш вью конструктор не предназначен для вызова из xml,
+// suppress, потому что наш вью конструктор не предназначен для вызова из xml,
 // т.е. будет создаваться только программно
 @SuppressLint("ViewConstructor")
 class MarkdownImageView private constructor(
@@ -86,9 +86,9 @@ class MarkdownImageView private constructor(
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         iv_image = ImageView(context).apply {
             scaleType = ImageView.ScaleType.CENTER_CROP
-            setImageResource(R.drawable.ic_launcher_background)
             // outlineProvider используется для того, чтобы в material дизайне корректно
             // отрисовывались тени и elevation, а также он используется для обрезки изображения
+            // 6: 01:18:50
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
                     outline.setRoundRect(
@@ -166,7 +166,7 @@ class MarkdownImageView private constructor(
         // + setLayoutParams вызывает лишний перерасчёт самой вью
         //
         // create measureSpec for children EXACTLY
-        // all children width == parent width (constraint paren width)
+        // all children width == parent width (constraint parent width)
         val ms = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
 
         // measureChild(iv_image, widthMeasureSpec, heightMeasureSpec)

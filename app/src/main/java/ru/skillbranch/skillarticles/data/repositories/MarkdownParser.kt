@@ -296,16 +296,17 @@ sealed class MarkdownElement() {
     abstract val offset: Int // 6: 2:09:33 общее количество символов предшествующих markdown элементов
     // границы текста, который относится к данному markdown элементу that is bound to custom view group
     val bounds: Pair<Int, Int> by lazy {
-        when (this) {
+        val end = when (this) {
             is Text -> {
-                val end = elements.fold(offset) { acc, el ->
+                 elements.fold(offset) { acc, el ->
                     acc + el.spread().map { it.text.length }.sum()
                 }
-                offset to end
             }
-            is Image -> offset to image.text.length + offset
-            is Scroll -> offset to blockCode.text.length + offset
+            is Image -> image.text.length + offset
+            is Scroll -> blockCode.text.length + offset
         }
+        // начальная граница равна индексу символа, следующего за индексом предшеств. символа (offset)
+        (if (offset == 0) 0 else offset.inc()) to end
     }
 
     data class Text(

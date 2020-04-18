@@ -7,13 +7,12 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.text.Layout
 import android.text.Spanned
-import android.util.Log
-import androidx.annotation.VisibleForTesting
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.getSpans
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.*
 import ru.skillbranch.skillarticles.ui.custom.spans.HeaderSpan
+import ru.skillbranch.skillarticles.ui.custom.spans.InlineCodeSpan
 import ru.skillbranch.skillarticles.ui.custom.spans.SearchFocusSpan
 import ru.skillbranch.skillarticles.ui.custom.spans.SearchSpan
 
@@ -102,9 +101,12 @@ class SearchBgHelper(
     // массив, где каждый потомок будет являться invarianted? SearchSpan
     private lateinit var spans: Array<out SearchSpan>
     private lateinit var headerSpans: Array<out HeaderSpan>
+    private lateinit var inlineCodeSpans: Array<out InlineCodeSpan>
 
     private var spanStart = 0
     private var spanEnd = 0
+    private var codeSpanStart = 0
+    private var codeSpanEnd = 0
     private var startLine = 0
     private var endLine = 0
 
@@ -113,6 +115,8 @@ class SearchBgHelper(
     private var endOffset = 0
     private var topExtraPadding = 0
     private var bottomExtraPadding = 0
+    private var startExtraPadding = 0
+    private var endExtraPadding = 0
 
     fun draw(canvas: Canvas, text: Spanned, layout: Layout) {
         spans = text.getSpans()
@@ -140,11 +144,36 @@ class SearchBgHelper(
                         || spanEnd in headerSpans[0].firstLineBounds
                     ) headerSpans[0].topExtraPadding else 0
 
-                // если это последняя строка, будет возвращён bottomExtraPadding, если начало или конец входят в границы последней строки хэдера
+                // если это последняя строка, будет возвращён bottomExtraPadding,
+                // в случае, если начало или конец входят в границы последней строки хэдера
                 bottomExtraPadding =
                     if (spanStart in headerSpans[0].lastLineBounds
                         || spanEnd in headerSpans[0].lastLineBounds
                     ) headerSpans[0].bottomExtraPadding else 0
+            }
+
+            inlineCodeSpans = text.getSpans(spanStart, spanEnd, InlineCodeSpan::class.java)
+
+            startExtraPadding = 0
+            endExtraPadding = 0
+
+            if (inlineCodeSpans.isNotEmpty()) {
+                with (inlineCodeSpans[0]) {
+                    codeSpanStart = text.getSpanStart(this)
+                    codeSpanEnd = text.getSpanEnd(this)
+
+                    startExtraPadding = when {
+                        spanStart < codeSpanStart -> 0
+                        spanStart > codeSpanStart -> -this.padding.toInt()
+                        else -> this.padding.toInt()
+                    }
+
+                    endExtraPadding = when {
+                        spanEnd < codeSpanEnd -> this.padding.toInt()
+                        spanEnd > codeSpanEnd -> 0
+                        else -> this.padding.toInt()
+                    }
+                }
             }
 
             startOffset = layout.getPrimaryHorizontal(spanStart).toInt()
@@ -159,7 +188,9 @@ class SearchBgHelper(
                 startOffset,
                 endOffset,
                 topExtraPadding,
-                bottomExtraPadding
+                bottomExtraPadding,
+                startExtraPadding,
+                endExtraPadding
             )
 
         }
@@ -177,7 +208,9 @@ abstract class SearchBgRender(
         startOffset: Int,
         endOffset: Int,
         topExtraPadding: Int = 0,
-        bottomExtraPadding: Int = 0
+        bottomExtraPadding: Int = 0,
+        startExtraPadding: Int = 0,
+        endExtraPadding: Int = 0
     )
 
     fun getLineTop(layout: Layout, line: Int): Int {
@@ -206,11 +239,17 @@ class SingleLineRender(
         startOffset: Int,
         endOffset: Int,
         topExtraPadding: Int,
-        bottomExtraPadding: Int
+        bottomExtraPadding: Int,
+        startExtraPadding: Int,
+        endExtraPadding: Int
     ) {
         lineTop = getLineTop(layout, startLine) + topExtraPadding
         lineBottom = getLineBottom(layout, startLine) - bottomExtraPadding
-        drawable.setBounds(startOffset - padding, lineTop, endOffset + padding, lineBottom)
+        drawable.setBounds(
+            startOffset + startExtraPadding - padding,
+            lineTop,
+            endOffset - endExtraPadding + padding,
+            lineBottom)
         drawable.draw(canvas)
     }
 
@@ -236,7 +275,9 @@ class MultiLineRender(
         startOffset: Int,
         endOffset: Int,
         topExtraPadding: Int,
-        bottomExtraPadding: Int
+        bottomExtraPadding: Int,
+        startExtraPadding: Int,
+        endExtraPadding: Int
     ) {
         // draw first line
         // вычисляем, где будет заканчиваться строка (где последняя позиция по оси x в конце строки)

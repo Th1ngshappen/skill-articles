@@ -21,26 +21,30 @@ fun Layout.getLineTopWithoutPadding(line: Int): Int {
  * Returns the bottom of the Layout after removing the extra padding applied by the Layout.
  */
 
-// TODO
-// 6: 02:15:50 line spacing добавляет отступ для новой строки каждый раз, кроме последней (см презентацию)
-// есть недокументированное условие: если последняя строка является whitespace символом, отступ также не добавляется
-// с этим связан этот баг - в экст. функции мы отнимаем спэйсинг только для последней стрки -
-// для последних строчек будет некорректно рассчитываться отступ
 fun Layout.getLineBottomWithoutPadding(line: Int): Int {
-    return getLineBottom(line) - if (line == lineCount - 1) bottomPadding else 0
+    return getLineBottomWithoutSpacing(line) - if (line == lineCount - 1) bottomPadding else 0
 }
 
 /**
  * Get the line bottom discarding the line spacing added.
  */
-// TODO найти и исправить какой-то визуальный баг (около 01:00:00)
 fun Layout.getLineBottomWithoutSpacing(line: Int): Int {
-    val lineBottom = getLineBaseline(line)
+    val lineBottom = getLineBottom(line)
     val isLastLine = line == lineCount.dec()
     val hasLineSpacing = spacingAdd != 0f
 
-    return if (!hasLineSpacing || isLastLine) {
-        lineBottom + spacingAdd.toInt()
+    val nextLineIsLast = line == lineCount - 2
+
+    // 6: 00:58:10, 02:15:50 line spacing добавляет отступ для новой строки каждый раз, кроме последней (см презентацию)
+    // есть недокументированное условие: если последняя строка является whitespace символом, отступ также не добавляется
+    val onlyWhitespaceIsAfter = if (nextLineIsLast) {
+        val start = getLineStart(line + 1)
+        val lastVisible = getLineVisibleEnd(line + 1)
+        start == lastVisible
+    } else false
+
+    return if (!hasLineSpacing || isLastLine || onlyWhitespaceIsAfter) {
+        lineBottom
     } else {
         lineBottom - spacingAdd.toInt()
     }
