@@ -82,6 +82,8 @@ class MarkdownImageView private constructor(
         strokeWidth = 0f
     }
 
+    private var aspectRatio = 0f
+
     init {
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         iv_image = ImageView(context).apply {
@@ -148,6 +150,15 @@ class MarkdownImageView private constructor(
         }
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        Glide
+            .with(context)
+            .load(imageUrl)
+            .transform(AspectRatioResizeTransform())
+            .into(iv_image)
+    }
+
     // onMeasure и onLayout важнее всего оптимизировать для хорошей производительности при отрисовке вью
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -166,13 +177,16 @@ class MarkdownImageView private constructor(
         // + setLayoutParams вызывает лишний перерасчёт самой вью
         //
         // create measureSpec for children EXACTLY
-        // all children width == parent width (constraint parent width)
+        // all children width == parent width (constraint paren width)
         val ms = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
 
-        // measureChild(iv_image, widthMeasureSpec, heightMeasureSpec)
+        if (aspectRatio != 0f) {
+            // restore width & height considering aspectRatio
+            val hms = MeasureSpec.makeMeasureSpec((width / aspectRatio).toInt(), MeasureSpec.EXACTLY)
+            iv_image.measure(ms, hms)
+        } else iv_image.measure(ms, heightMeasureSpec)
+
         // measureChild(tv_title, widthMeasureSpec, heightMeasureSpec)
-        // if (tv_alt != null) measureChild(tv_alt, widthMeasureSpec, heightMeasureSpec)
-        iv_image.measure(ms, heightMeasureSpec)
         tv_title.measure(ms, heightMeasureSpec)
         tv_alt?.measure(ms, heightMeasureSpec)
 
@@ -241,6 +255,7 @@ class MarkdownImageView private constructor(
     override fun onSaveInstanceState(): Parcelable? {
         val savedState = SavedState(super.onSaveInstanceState())
         savedState.ssIsAltShown = tv_alt?.isVisible ?: false
+        savedState.ssAspectRatio = (iv_image.width.toFloat() / iv_image.height)
         return savedState
     }
 
@@ -248,6 +263,7 @@ class MarkdownImageView private constructor(
         super.onRestoreInstanceState(state)
         if (state is SavedState) {
             tv_alt?.isVisible = state.ssIsAltShown
+            aspectRatio = state.ssAspectRatio
         }
     }
 
@@ -277,12 +293,13 @@ class MarkdownImageView private constructor(
         va.start()
     }
 
-    private class SavedState: BaseSavedState, Parcelable {
+    private class SavedState : BaseSavedState, Parcelable {
         var ssIsAltShown: Boolean = false
+        var ssAspectRatio: Float = 0f
 
         constructor(superState: Parcelable?) : super(superState)
 
-        constructor(src: Parcel): super(src) {
+        constructor(src: Parcel) : super(src) {
             ssIsAltShown = src.readInt() == 1
         }
 
@@ -290,6 +307,7 @@ class MarkdownImageView private constructor(
             super.writeToParcel(dst, flags)
             dst.writeInt(if (ssIsAltShown) 1 else 0)
         }
+
         companion object CREATOR : Parcelable.Creator<SavedState> {
             override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
             override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)

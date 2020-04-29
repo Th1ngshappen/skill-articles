@@ -1,7 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?><!-- merge позволяет вложить вью в тот контейнер, который мы предоставим в нашей кастомной вьюхе -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ru.skillbranch.skillarticles.ui.custom.Bottombar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottombar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:layout_gravity="bottom"
+    android:elevation="4dp"
+    android:theme="@style/ArticleBarsTheme"
+    app:layout_insetEdge="bottom"
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
     <ru.skillbranch.skillarticles.ui.custom.CheckableImageView
@@ -99,4 +106,4 @@
 
     </LinearLayout>
 
-</merge>
+</ru.skillbranch.skillarticles.ui.custom.Bottombar>

@@ -8,11 +8,35 @@ import kotlin.reflect.KProperty
 abstract class Binding {
     // mutableMapOf<поле делегата, сам делегат>
     val delegates = mutableMapOf<String, RenderProp<out Any>>()
+    var isInflated = false
 
-    abstract fun onFinishInflate()
+    open val afterInflated: (() -> Unit)? = null
+    fun onFinishInflate() {
+        if (!isInflated) {
+            afterInflated?.invoke()
+            isInflated = true
+        }
+    }
+
+    // Binding будет создан единожды, но метод rebind будет
+    // у него вызываться каждый раз, когда будет создаваться новая вью
+    fun rebind() {
+        delegates.forEach { it.value.bind() }
+    }
+
     abstract fun bind(data: IViewModelState)
-    abstract fun saveUi(outState: Bundle)
-    abstract fun restoreUi(savedState: Bundle)
+    /**
+     * override this if need save binding in bundle
+     */
+    open fun saveUi(outState: Bundle) {
+        //empty default implementation
+    }
+    /**
+     * override this if need restore binding from bundle
+     */
+    open fun restoreUi(savedState: Bundle?) {
+        //empty default implementation
+    }
 
 
     // onChange - обработчик, который будет вызван в том случае, если одно из значений, переданных первым

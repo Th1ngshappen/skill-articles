@@ -41,7 +41,7 @@ class MarkdownCodeView private constructor(
 
     private lateinit var codeString: CharSequence
 
-    //views
+    // views
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val iv_copy: ImageView
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -50,7 +50,7 @@ class MarkdownCodeView private constructor(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val sv_scroll: HorizontalScrollView
 
-    //colors
+    // colors
     @ColorInt
     private val darkSurface: Int = context.attrValue(R.attr.darkSurfaceColor)
     @ColorInt
@@ -60,7 +60,7 @@ class MarkdownCodeView private constructor(
     @ColorInt
     private val lightOnSurface: Int = context.attrValue(R.attr.lightOnSurfaceColor)
 
-    //sizes
+    // sizes
     private val iconSize = context.dpToIntPx(12)
     private val radius = context.dpToPx(8)
     private val padding = context.dpToIntPx(8)
@@ -68,7 +68,7 @@ class MarkdownCodeView private constructor(
     private val textExtraPadding = context.dpToIntPx(80)
     private val scrollBarHeight = context.dpToIntPx(2)
 
-    //for layout
+    // for layout
     private var isSingleLine = false
     private var isDark = false
     private var isManual = false
@@ -240,13 +240,13 @@ class MarkdownCodeView private constructor(
         tv_codeView.setTextColor(textColor)
     }
 
-    private class SavedState: BaseSavedState, Parcelable {
+    private class SavedState : BaseSavedState, Parcelable {
         var ssIsManual: Boolean = false
         var ssIsDark: Boolean = false
 
         constructor(superState: Parcelable?) : super(superState)
 
-        constructor(src: Parcel): super(src) {
+        constructor(src: Parcel) : super(src) {
             ssIsManual = src.readInt() == 1
             ssIsDark = src.readInt() == 1
         }
@@ -256,6 +256,7 @@ class MarkdownCodeView private constructor(
             dst.writeInt(if (ssIsManual) 1 else 0)
             dst.writeInt(if (ssIsDark) 1 else 0)
         }
+
         companion object CREATOR : Parcelable.Creator<SavedState> {
             override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
             override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
