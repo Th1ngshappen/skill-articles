@@ -68,63 +68,63 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         setPadding(padding)
 
         tv_date = TextView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.tv_date
             setTextColor(colorGray)
             textSize = fontSizeSmall
         }
         tv_author = TextView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.tv_author
             setTextColor(colorPrimary)
             textSize = fontSizeSmall
         }
         tv_title = TextView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.tv_title
             setTextColor(colorPrimary)
             textSize = fontSizeLarge
             setTypeface(typeface, Typeface.BOLD)
         }
         iv_poster = ImageView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.iv_poster
             layoutParams = LayoutParams(posterSize, posterSize)
         }
         iv_category = ImageView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.iv_category
             layoutParams = LayoutParams(categorySize, categorySize)
         }
         tv_description = TextView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.tv_description
             setTextColor(colorGray)
             textSize = fontSizeMedium
         }
         iv_likes = ImageView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.iv_likes
             layoutParams = LayoutParams(iconSize, iconSize)
             setImageResource(R.drawable.ic_favorite_black_24dp)
             imageTintList = ColorStateList.valueOf(colorGray)
         }
         tv_likes_count = TextView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.tv_likes_count
             setTextColor(colorGray)
             textSize = fontSizeSmall
         }
         iv_comments = ImageView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.iv_comments
             layoutParams = LayoutParams(iconSize, iconSize)
             setImageResource(R.drawable.ic_insert_comment_black_24dp)
             imageTintList = ColorStateList.valueOf(colorGray)
         }
         tv_comments_count = TextView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.tv_comments_count
             setTextColor(colorGray)
             textSize = fontSizeSmall
         }
         tv_read_duration = TextView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.tv_read_duration
             setTextColor(colorGray)
             textSize = fontSizeSmall
         }
         iv_bookmark = ImageView(context).apply {
-            id = ViewCompat.generateViewId()
+            id = R.id.iv_bookmark
             layoutParams = LayoutParams(iconSize, iconSize)
             setImageResource(R.drawable.bookmark_states)
             imageTintList = ColorStateList.valueOf(colorGray)
