@@ -20,6 +20,7 @@ import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.format
 import kotlin.math.max
 
+@Suppress("PropertyName") // for underscores
 class ArticleItemView constructor(context: Context) : ViewGroup(context), LayoutContainer {
 
     override val containerView = this
@@ -129,18 +130,6 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
             imageTintList = ColorStateList.valueOf(colorGray)
         }
 
-    }
-
-    fun bind(data: ArticleItemData) {
-
-        tv_date.text = data.date.format()
-        tv_author.text = data.author
-        tv_title.text = data.title
-        tv_description.text = data.description
-        tv_likes_count.text = data.likeCount.toString()
-        tv_comments_count.text = data.commentCount.toString()
-        tv_read_duration.text = "${data.readDuration} min read"
-
         addView(tv_date)
         addView(tv_author)
         addView(tv_title)
@@ -153,6 +142,17 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         addView(iv_likes)
         addView(iv_comments)
         addView(iv_bookmark)
+    }
+
+    fun bind(data: ArticleItemData) {
+
+        tv_date.text = data.date.format()
+        tv_author.text = data.author
+        tv_title.text = data.title
+        tv_description.text = data.description
+        tv_likes_count.text = data.likeCount.toString()
+        tv_comments_count.text = data.commentCount.toString()
+        tv_read_duration.text = "${data.readDuration} min read"
 
         Glide.with(context)
             .load(data.poster)
@@ -245,13 +245,12 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         val posterVerticalMargins = marginSmall + posterBottomMargin
         val secondSectionHeight = max(
             titleVerticalMargins + tv_title.measuredHeight,
-            posterVerticalMargins + posterSize
+            posterVerticalMargins + posterSize + categorySize / 2
         )
 
-        val titleTop = usedHeight +
-                marginSmall +
-                (secondSectionHeight - titleVerticalMargins) / 2 -
-                tv_title.measuredHeight / 2
+        // current height + top title margin + half free room - half title height
+        val titleTop = usedHeight + marginSmall +
+                (secondSectionHeight - titleVerticalMargins - tv_title.measuredHeight) / 2
 
         tv_title.layout(
             left,
@@ -260,10 +259,8 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
             titleTop + tv_title.measuredHeight
         )
 
-        val posterTop = usedHeight +
-                marginSmall +
-                (secondSectionHeight - posterVerticalMargins) / 2 -
-                posterSize / 2
+        val posterTop = usedHeight + marginSmall +
+                (secondSectionHeight - posterVerticalMargins - posterSize) / 2
 
         iv_poster.layout(
             right - posterSize,
@@ -276,7 +273,7 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
             right - posterSize - categorySize / 2,
             posterTop + posterSize - categorySize / 2,
             right - posterSize + categorySize / 2,
-             posterTop+ posterSize + categorySize / 2
+            posterTop + posterSize + categorySize / 2
         )
 
         usedHeight += secondSectionHeight
@@ -298,13 +295,14 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         )
         usedWidth += iconSize
 
+        usedWidth += marginSmall
         tv_likes_count.layout(
-            usedWidth + marginSmall,
+            usedWidth,
             usedHeight,
-            usedWidth + marginSmall + tv_likes_count.measuredWidth,
+            usedWidth + tv_likes_count.measuredWidth,
             usedHeight + tv_likes_count.measuredHeight
         )
-        usedWidth += marginSmall + tv_likes_count.measuredWidth
+        usedWidth += tv_likes_count.measuredWidth
 
         iv_comments.layout(
             usedWidth + marginMedium,
