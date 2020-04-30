@@ -185,7 +185,7 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         usedHeight += max(tv_date.measuredHeight, tv_author.measuredHeight)
 
         val titleWidth =
-            width - (horizontalPadding + marginLarge + categorySize / 2 + posterSize)
+            width - (horizontalPadding + marginLarge + posterSize)
         val msTitle = MeasureSpec.makeMeasureSpec(titleWidth, MeasureSpec.EXACTLY)
         tv_title.measure(msTitle, heightMeasureSpec)
 
