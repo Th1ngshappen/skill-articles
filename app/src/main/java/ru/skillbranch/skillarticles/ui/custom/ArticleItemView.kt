@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
-import androidx.core.view.ViewCompat
 import androidx.core.view.setPadding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -241,27 +240,14 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         )
         usedHeight += max(tv_date.measuredHeight, tv_author.measuredHeight)
 
-        // poster & category
-        iv_poster.layout(
-            right - posterSize,
-            usedHeight + marginSmall,
-            right,
-            usedHeight + marginSmall + posterSize
-        )
-
-        iv_category.layout(
-            right - posterSize - categorySize / 2,
-            usedHeight + marginSmall + posterSize - categorySize / 2,
-            right - posterSize + categorySize / 2,
-            usedHeight + marginSmall + posterSize + categorySize / 2
-        )
-
-        // title
+        // title, poster & category
         val titleVerticalMargins = marginSmall + marginSmall
+        val posterVerticalMargins = marginSmall + posterBottomMargin
         val secondSectionHeight = max(
             titleVerticalMargins + tv_title.measuredHeight,
-            marginSmall + posterSize + posterBottomMargin
+            posterVerticalMargins + posterSize
         )
+
         val titleTop = usedHeight +
                 marginSmall +
                 (secondSectionHeight - titleVerticalMargins) / 2 -
@@ -272,6 +258,25 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
             titleTop,
             left + tv_title.measuredWidth,
             titleTop + tv_title.measuredHeight
+        )
+
+        val posterTop = usedHeight +
+                marginSmall +
+                (secondSectionHeight - posterVerticalMargins) / 2 -
+                posterSize / 2
+
+        iv_poster.layout(
+            right - posterSize,
+            posterTop,
+            right,
+            posterTop + posterSize
+        )
+
+        iv_category.layout(
+            right - posterSize - categorySize / 2,
+            posterTop + posterSize - categorySize / 2,
+            right - posterSize + categorySize / 2,
+             posterTop+ posterSize + categorySize / 2
         )
 
         usedHeight += secondSectionHeight
