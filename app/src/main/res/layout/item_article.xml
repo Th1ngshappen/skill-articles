@@ -47,7 +47,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="24dp"
         android:textColor="?attr/colorPrimary"
-        tools:text="Инженеры создали 3D-дисплей из «Звёздных войн» 3D-дисплей из «Звёздных войн» 3D-дисплей из «Звёздных войн»"
+        tools:text="Инженеры создали 3D-дисплей из «Звёздных войн»Инженеры создали 3D-дисплей из «Звёздных войн»Инженеры создали 3D-дисплей из «Звёздных войн» 3D-дисплей из «Звёздных войн» 3D-дисплей из «Звёздных войн»"
         app:layout_constraintTop_toBottomOf="@id/barrier_top"
         app:layout_constraintBottom_toTopOf="@id/barrier_bottom"
         app:layout_constraintStart_toStartOf="parent"
@@ -93,7 +93,7 @@
         tools:text="Не контент, а дополнительное описание для основного заголовка."
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_category" />
+        app:layout_constraintTop_toBottomOf="@+id/barrier_bottom" />
 
     <ImageView
         android:id="@+id/iv_likes"

@@ -20,7 +20,7 @@ import androidx.test.rule.ActivityTestRule
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import junit.framework.Assert.assertEquals
 import kotlinx.android.synthetic.main.activity_root.*
-import kotlinx.android.synthetic.main.fragment_article.*
+import kotlinx.android.synthetic.main.item_article.*
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -426,3 +426,4 @@ class InstrumentalTest1 {
         }
     }
 }
+

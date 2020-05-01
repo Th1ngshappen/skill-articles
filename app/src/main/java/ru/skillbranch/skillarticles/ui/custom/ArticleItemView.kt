@@ -277,7 +277,6 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         )
 
         usedHeight += max(tv_title.measuredHeight, picturesHeight)
-        usedHeight += marginSmall
 
         // description
         usedHeight += marginSmall

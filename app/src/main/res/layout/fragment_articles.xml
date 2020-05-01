@@ -5,6 +5,7 @@
     android:id="@+id/rv_articles"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.articles.ArticlesFragment"/>
+    tools:context=".ui.articles.ArticlesFragment"
+    tools:listitem="@layout/item_article"/>
 
 
