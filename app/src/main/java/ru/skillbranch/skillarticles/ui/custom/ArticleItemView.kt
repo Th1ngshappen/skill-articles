@@ -184,7 +184,7 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         val msAuthor = MeasureSpec.makeMeasureSpec(authorWidth, MeasureSpec.EXACTLY)
         tv_author.measure(msAuthor, heightMeasureSpec)
 
-        usedHeight += max(tv_date.measuredHeight, tv_author.measuredHeight)
+        usedHeight += tv_author.measuredHeight
 
         // title
         val titleWidth =
@@ -212,9 +212,7 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         val msDuration = MeasureSpec.makeMeasureSpec(durationWidth, MeasureSpec.EXACTLY)
         tv_read_duration.measure(msDuration, heightMeasureSpec)
 
-        usedHeight += iconSize
-
-        usedHeight += paddingBottom
+        usedHeight += iconSize + paddingBottom
         setMeasuredDimension(width, usedHeight)
     }
 
