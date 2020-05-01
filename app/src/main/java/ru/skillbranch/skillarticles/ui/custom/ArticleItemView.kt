@@ -18,6 +18,7 @@ import ru.skillbranch.skillarticles.data.ArticleItemData
 import ru.skillbranch.skillarticles.extensions.attrValue
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.format
+import kotlin.math.abs
 import kotlin.math.max
 
 @Suppress("PropertyName") // for underscores
@@ -244,16 +245,15 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         usedHeight += max(tv_date.measuredHeight, tv_author.measuredHeight)
 
         // title, poster & category
-        val titleVerticalMargins = 2 * marginSmall
-        val posterVerticalMargins = 2 * marginSmall
-        val secondSectionHeight = max(
-            titleVerticalMargins + tv_title.measuredHeight,
-            posterVerticalMargins + posterSize + categorySize / 2
-        )
+        usedHeight += marginSmall
+        val picturesHeight = posterSize + categorySize / 2
+        val delta = abs(tv_title.measuredHeight - picturesHeight) / 2
 
-        // current height + top title margin + half free room - half title height
-        val titleTop = usedHeight + marginSmall +
-                (secondSectionHeight - titleVerticalMargins - tv_title.measuredHeight) / 2
+        val (titleTop, posterTop) = if (tv_title.measuredHeight > picturesHeight) {
+            usedHeight to usedHeight + delta
+        } else {
+            usedHeight + delta to usedHeight
+        }
 
         tv_title.layout(
             left,
@@ -261,9 +261,6 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
             left + tv_title.measuredWidth,
             titleTop + tv_title.measuredHeight
         )
-
-        val posterTop = usedHeight + marginSmall +
-                (secondSectionHeight - posterVerticalMargins - posterSize) / 2
 
         iv_poster.layout(
             right - posterSize,
@@ -279,7 +276,8 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
             posterTop + posterSize + categorySize / 2
         )
 
-        usedHeight += secondSectionHeight
+        usedHeight += max(tv_title.measuredHeight, picturesHeight)
+        usedHeight += marginSmall
 
         // description
         usedHeight += marginSmall
@@ -290,7 +288,6 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         usedHeight += marginSmall
         usedWidth = left
 
-        // the icon is placed on the center line of the count
         val likesIconTop = usedHeight + (tv_likes_count.measuredHeight - iconSize) / 2
         iv_likes.layout(
             usedWidth,
