@@ -193,16 +193,14 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         tv_title.measure(msTitle, heightMeasureSpec)
 
         usedHeight += max(
-            marginSmall + tv_title.measuredHeight + marginSmall,
-            marginSmall + posterSize + categorySize / 2 + marginSmall
-        )
+            tv_title.measuredHeight,
+            posterSize + categorySize / 2
+        ) + 2 * marginSmall
 
-        usedHeight += marginSmall
         val ms = MeasureSpec.makeMeasureSpec(width - horizontalPadding, MeasureSpec.EXACTLY)
         tv_description.measure(ms, heightMeasureSpec)
-        usedHeight += tv_description.measuredHeight
+        usedHeight += tv_description.measuredHeight + 2 * marginSmall
 
-        usedHeight += marginSmall
         measureChild(tv_likes_count, widthMeasureSpec, heightMeasureSpec)
         measureChild(tv_comments_count, widthMeasureSpec, heightMeasureSpec)
 
@@ -214,12 +212,7 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         val msDuration = MeasureSpec.makeMeasureSpec(durationWidth, MeasureSpec.EXACTLY)
         tv_read_duration.measure(msDuration, heightMeasureSpec)
 
-        usedHeight += arrayOf(
-            iconSize,
-            tv_likes_count.measuredHeight,
-            tv_comments_count.measuredHeight,
-            tv_read_duration.measuredHeight
-        ).max()!!
+        usedHeight += iconSize
 
         usedHeight += paddingBottom
         setMeasuredDimension(width, usedHeight)
