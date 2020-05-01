@@ -175,14 +175,17 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         val width = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
         val horizontalPadding = paddingStart + paddingEnd
 
+        // date
         measureChild(tv_date, widthMeasureSpec, heightMeasureSpec)
 
+        // author
         val authorWidth = width - (horizontalPadding + tv_date.measuredWidth)
         val msAuthor = MeasureSpec.makeMeasureSpec(authorWidth, MeasureSpec.EXACTLY)
         tv_author.measure(msAuthor, heightMeasureSpec)
 
         usedHeight += max(tv_date.measuredHeight, tv_author.measuredHeight)
 
+        // title
         val titleWidth =
             width - (horizontalPadding + marginLarge + posterSize)
         val msTitle = MeasureSpec.makeMeasureSpec(titleWidth, MeasureSpec.EXACTLY)
@@ -190,7 +193,7 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
 
         usedHeight += max(
             marginSmall + tv_title.measuredHeight + marginSmall,
-            marginSmall + posterSize + posterBottomMargin
+            marginSmall + posterSize + categorySize / 2 + marginSmall
         )
 
         usedHeight += marginSmall
@@ -241,8 +244,8 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         usedHeight += max(tv_date.measuredHeight, tv_author.measuredHeight)
 
         // title, poster & category
-        val titleVerticalMargins = marginSmall + marginSmall
-        val posterVerticalMargins = marginSmall + posterBottomMargin
+        val titleVerticalMargins = 2 * marginSmall
+        val posterVerticalMargins = 2 * marginSmall
         val secondSectionHeight = max(
             titleVerticalMargins + tv_title.measuredHeight,
             posterVerticalMargins + posterSize + categorySize / 2
@@ -287,11 +290,13 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         usedHeight += marginSmall
         usedWidth = left
 
+        // the icon is placed on the center line of the count
+        val likesIconTop = usedHeight + (tv_likes_count.measuredHeight - iconSize) / 2
         iv_likes.layout(
             usedWidth,
-            usedHeight,
+            likesIconTop,
             usedWidth + iconSize,
-            usedHeight + iconSize
+            likesIconTop + iconSize
         )
         usedWidth += iconSize
 
@@ -304,26 +309,30 @@ class ArticleItemView constructor(context: Context) : ViewGroup(context), Layout
         )
         usedWidth += tv_likes_count.measuredWidth
 
+        usedWidth += marginMedium
+        val commentsIconTop = usedHeight + (tv_comments_count.measuredHeight - iconSize) / 2
         iv_comments.layout(
-            usedWidth + marginMedium,
-            usedHeight,
-            usedWidth + marginMedium + iconSize,
-            usedHeight + iconSize
+            usedWidth,
+            commentsIconTop,
+            usedWidth + iconSize,
+            commentsIconTop + iconSize
         )
-        usedWidth += marginMedium + iconSize
+        usedWidth += iconSize
 
+        usedWidth += marginSmall
         tv_comments_count.layout(
-            usedWidth + marginSmall,
+            usedWidth,
             usedHeight,
-            usedWidth + marginSmall + tv_comments_count.measuredWidth,
+            usedWidth + tv_comments_count.measuredWidth,
             usedHeight + tv_comments_count.measuredHeight
         )
-        usedWidth += marginSmall + tv_comments_count.measuredWidth
+        usedWidth += tv_comments_count.measuredWidth
 
+        usedWidth += marginMedium
         tv_read_duration.layout(
-            usedWidth + marginMedium,
+            usedWidth,
             usedHeight,
-            usedWidth + marginMedium + tv_read_duration.measuredWidth,
+            usedWidth + tv_read_duration.measuredWidth,
             usedHeight + tv_read_duration.measuredHeight
         )
 
