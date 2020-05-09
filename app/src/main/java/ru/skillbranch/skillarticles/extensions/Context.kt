@@ -7,10 +7,6 @@ import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.AttrRes
-import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.ui.delegates.AttrValue
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 fun Context.attrValue(@AttrRes color: Int) : Int {
     val tv = TypedValue()

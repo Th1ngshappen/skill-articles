@@ -33,7 +33,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             item.title
         )
 
-        // findNavController().navigate(action)
         viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))
     }
 
@@ -46,7 +45,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
     }
 
     inner class ArticlesBinding : Binding() {
-        // private var articles: List<ArticleItemData> by RenderProp(emptyList()) {
         private var articles: List<ArticleItemData> by RenderProp<List<ArticleItemData>>(emptyList()) {
             articlesAdapter.submitList(it)
         }

@@ -22,6 +22,7 @@ class RootActivity : BaseActivity<RootViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         // top level destination
         val appbarConfiguration = AppBarConfiguration(
             setOf(
@@ -42,23 +43,21 @@ class RootActivity : BaseActivity<RootViewModel>() {
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
 
-            if (viewModel.currentState.isAuth && destination.id == R.id.nav_auth) {
-                controller.popBackStack()
-                viewModel.navigate(NavigationCommand.To(R.id.nav_profile, arguments))
-            }
-
             // if destination change set select bottom navigation item
             nav_view.selectDestination(destination)
+
+            if (viewModel.currentState.isAuth && destination.id == R.id.nav_auth) {
+                controller.popBackStack()
+                // private_destination хранит destination, на который нужно попасть после авторизации
+                val private = arguments?.get("private_destination") as Int?
+                if (private != null) controller.navigate(private)
+            }
         }
     }
 
     override fun renderNotification(notify: Notify) {
         val snackbar = Snackbar.make(container, notify.message, Snackbar.LENGTH_LONG)
-
-        val bb = findViewById<Bottombar?>(R.id.bottombar)
-        // if (bottombar != null) snackbar.anchorView = bottombar
-        // else snackbar.anchorView = nav_view
-        snackbar.anchorView = bb ?: nav_view
+        snackbar.anchorView = findViewById<Bottombar>(R.id.bottombar) ?: nav_view
 
         when (notify) {
             is Notify.TextMessage -> { /* nothing */
@@ -87,6 +86,5 @@ class RootActivity : BaseActivity<RootViewModel>() {
     override fun subscribeOnState(state: IViewModelState) {
         // DO something with state
     }
-
 
 }

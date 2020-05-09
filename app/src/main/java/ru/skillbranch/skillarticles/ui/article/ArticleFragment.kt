@@ -69,11 +69,10 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     }
 
     private val bottombar
-        // get() = root.bottombar
+        // 8: 33:30 вместо findViewById можно сделать через clearViewCash
         get() = root.findViewById<Bottombar>(R.id.bottombar)
 
     private val submenu
-        // get() = root.submenu
         get() = root.findViewById<ArticleSubmenu>(R.id.submenu)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -316,9 +315,6 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             isBigText = data.isBigText
             isDarkMode = data.isDarkMode
 
-//            if (data.title != null) title = data.title
-//            if (data.category != null) category = data.category
-//            if (data.categoryIcon != null) categoryIcon = data.categoryIcon as Int
             content = data.content
 
             isLoadingContent = data.isLoadingContent

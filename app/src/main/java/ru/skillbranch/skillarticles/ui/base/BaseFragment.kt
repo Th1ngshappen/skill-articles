@@ -22,10 +22,7 @@ abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment()
     open val prepareBottombar: (BottombarBuilder.() -> Unit)? = null
 
     val toolbar: MaterialToolbar
-        get() {
-            Log.d("M_BaseFragment", root.toolbar.toString())
-            return root.toolbar
-        }
+        get() = root.toolbar
 
     // set listeners, tuning views
     abstract fun setupViews()
