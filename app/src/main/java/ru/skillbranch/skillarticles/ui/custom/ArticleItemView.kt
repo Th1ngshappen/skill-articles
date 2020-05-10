@@ -289,6 +289,6 @@ class ArticleItemView constructor(
         tv_likes_count.text = "${item.likeCount}"
         tv_comments_count.text = "${item.commentCount}"
         tv_read_duration.text = "${item.readDuration} min read"
-        iv_bookmark.isChecked = item.isBookmark
+        
     }
 }
