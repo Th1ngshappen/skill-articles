@@ -1,10 +1,10 @@
 package ru.skillbranch.skillarticles.ui.custom
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.view.View
 import android.view.ViewAnimationUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -91,6 +91,15 @@ class Bottombar @JvmOverloads constructor(
             btn_result_up.isEnabled = position > 0
             btn_result_down.isEnabled = position < searchCount.dec()
         }
+    }
+
+    fun show() {
+        // translationY не вызывает перерисовки самой компоненты, а просто её смещает
+        ObjectAnimator.ofFloat(this, "translationY", 0f).start()
+    }
+
+    fun hide() {
+        ObjectAnimator.ofFloat(this, "translationY", height.toFloat()).start()
     }
 
     private class SavedState : BaseSavedState, Parcelable {

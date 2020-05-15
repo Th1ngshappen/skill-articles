@@ -139,6 +139,13 @@ sealed class Notify() {
         val actionHandler: (() -> Unit)
     ) : Notify()
 
+    data class ActionMessageWithFlag(
+        override val message: String,
+        val actionLabel: String,
+        val actionHandler: ((Boolean) -> Unit),
+        val flag: Boolean
+    ) : Notify()
+
     data class ErrorMessage(
         override val message: String,
         val errLabel: String,

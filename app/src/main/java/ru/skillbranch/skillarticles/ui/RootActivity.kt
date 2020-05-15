@@ -68,6 +68,12 @@ class RootActivity : BaseActivity<RootViewModel>() {
                     notify.actionHandler.invoke()
                 }
             }
+            is Notify.ActionMessageWithFlag -> {
+                snackbar.setActionTextColor(getColor(R.color.color_accent_dark))
+                snackbar.setAction(notify.actionLabel) {
+                    notify.actionHandler.invoke(notify.flag)
+                }
+            }
             is Notify.ErrorMessage -> {
                 with(snackbar) {
                     setBackgroundTint(getColor(R.color.design_default_color_error))

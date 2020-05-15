@@ -1,8 +1,8 @@
 package ru.skillbranch.skillarticles.viewmodels.article
 
 import androidx.lifecycle.LiveData
-import ru.skillbranch.skillarticles.data.ArticleData
-import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
+import ru.skillbranch.skillarticles.data.models.ArticleData
+import ru.skillbranch.skillarticles.data.models.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 
 interface IArticleViewModel {
@@ -83,12 +83,12 @@ interface IArticleViewModel {
     fun handleSearch(query: String?)
 
     /**
-     * обработка нажатия на btn_result_up ,необходимо перенести фокус на предидущее поисковое вхождение
+     * обработка нажатия на btn_result_up, необходимо перенести фокус на предидущее поисковое вхождение
      */
     fun handleUpResult()
 
     /**
-     * обработка нажатия на btn_result_down ,необходимо перенести фокус на следующее поисковое вхождение
+     * обработка нажатия на btn_result_down, необходимо перенести фокус на следующее поисковое вхождение
      */
     fun handleDownResult()
 
@@ -100,5 +100,10 @@ interface IArticleViewModel {
     /**
      * обработка отправки комментария, если пользователь не авторизован отобразить экран авторизации
      **/
-    fun handleSendComment()
+    fun handleSendComment(comment: String)
+
+    /**
+     * обработка ввода комментария для его сохранения при уничтожении процесса
+     */
+    fun handleCommentInput(comment: String)
 }

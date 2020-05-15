@@ -53,12 +53,17 @@
         android:id="@+id/nav_bookmarks"
         android:name="ru.skillbranch.skillarticles.ui.bookmarks.BookmarksFragment"
         android:label="@string/title_bookmarks"
-        tools:layout="@layout/fragment_bookmarks" />
+        tools:layout="@layout/fragment_bookmarks">
+        <action
+            android:id="@+id/action_nav_bookmarks_to_page_article"
+            app:destination="@id/page_article" />
+    </fragment>
     <fragment
         android:id="@+id/nav_transcriptions"
         android:name="ru.skillbranch.skillarticles.ui.transcriptions.TranscriptionsFragment"
         android:label="@string/title_transcriptions"
         tools:layout="@layout/fragment_transcriptions" />
+
     <navigation
         android:id="@+id/auth"
         app:startDestination="@id/nav_auth"
@@ -73,6 +78,10 @@
                 android:name="private_destination"
                 app:argType="integer"
                 android:defaultValue="-1" />
+            <argument
+                android:name="comment"
+                app:argType="string"
+                android:defaultValue="null"/>
         </fragment>
         <fragment
             android:id="@+id/page_privacy_policy"
