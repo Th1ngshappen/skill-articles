@@ -370,7 +370,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             searchPosition = data.searchPosition
             answerTo = data.answerTo ?: "Comment"
             isShowBottombar = data.showBottomBar
-            comment = data.comment ?: ""
+            comment = data.commentText ?: ""
         }
 
         override fun saveUi(outState: Bundle) {

@@ -47,6 +47,7 @@ abstract class Binding {
     // таким образом, когда свойство этого делегата будет изменено,
     // будет вызван обработчик onChange,
     // в который будет переданы все текущие значения наблюдаемых полей из мапы delegates
+    @Suppress("UNCHECKED_CAST")
     fun <A, B, C> dependsOn(
         vararg fields: KProperty<*>,
         onChange: (A, B, C) -> Unit
@@ -60,6 +61,25 @@ abstract class Binding {
                     delegates[names[0]]?.value as A,
                     delegates[names[1]]?.value as B,
                     delegates[names[2]]?.value as C
+                )
+            }
+        }
+
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <A, B> dependsOn(
+        vararg fields: KProperty<*>,
+        onChange: (A, B) -> Unit
+    ) {
+        check(fields.size == 2) { "Names size must be 2, current ${fields.size}" }
+        val names = fields.map { it.name }
+
+        names.forEach {
+            delegates[it]?.addListener {
+                onChange(
+                    delegates[names[0]]?.value as A,
+                    delegates[names[1]]?.value as B
                 )
             }
         }

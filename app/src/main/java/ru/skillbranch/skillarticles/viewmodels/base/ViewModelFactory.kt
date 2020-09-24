@@ -9,7 +9,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleViewModel
 
 class ViewModelFactory(
-    owner: SavedStateRegistryOwner, // owner будет соханять saved state в bundle
+    owner: SavedStateRegistryOwner, // owner будет сохранять saved state в bundle
     defaultArgs: Bundle = bundleOf(),
     private val params: Any
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {

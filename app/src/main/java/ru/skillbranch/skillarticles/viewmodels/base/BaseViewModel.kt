@@ -1,6 +1,7 @@
 package ru.skillbranch.skillarticles.viewmodels.base
 
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
@@ -14,6 +15,7 @@ abstract class BaseViewModel<T : IViewModelState>(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val notifications = MutableLiveData<Event<Notify>>()
+
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val navigation = MutableLiveData<Event<NavigationCommand>>()
 
@@ -81,6 +83,8 @@ abstract class BaseViewModel<T : IViewModelState>(
         onChanged: (newValue: S, currentState: T) -> T?
     ) {
         state.addSource(source) {
+            // В лямбде обычный return не работает, он заставит выйти из функции, в которой лямбда вызвана.
+            // Чтобы выйти из лямбды, после return ставят метку - @lambda, указывающую на нужную лямбду
             state.value = onChanged(it, currentState) ?: return@addSource
         }
     }
@@ -91,6 +95,9 @@ abstract class BaseViewModel<T : IViewModelState>(
 
     @Suppress("UNCHECKED_CAST")
     fun restoreState() {
+        // чтобы не было избыточных срабатываний стэйта при ресторе - не обновляем лайвдату лишний раз
+        val restoreState = currentState.restore(handleState) as T
+        if (currentState == restoreState) return
         state.value = currentState.restore(handleState) as T
     }
 
@@ -159,13 +166,13 @@ sealed class NavigationCommand() {
         val args: Bundle? = null,
         val options: NavOptions? = null,
         val extras: Navigator.Extras? = null
-    ): NavigationCommand()
+    ) : NavigationCommand()
 
     data class StartLogin(
         val privateDestination: Int? = null
-    ): NavigationCommand()
+    ) : NavigationCommand()
 
     data class FinishLogin(
         val privateDestination: Int? = null
-    ): NavigationCommand()
+    ) : NavigationCommand()
 }

@@ -234,7 +234,7 @@ object MarkdownParser {
                 9 -> {
                     // full text for regex
                     text = string.subSequence(startIndex, endIndex)
-                    // деструктурирование по группам реглярного выражения
+                    // деструктурирование по группам регулярного выражения
                     val (title: String, link: String) = "\\[(.*)]\\((.*)\\)".toRegex().find(text)!!.destructured
 
                     val element = Element.Link(link, title)

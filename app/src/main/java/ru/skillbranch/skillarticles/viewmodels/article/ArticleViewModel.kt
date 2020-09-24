@@ -1,22 +1,20 @@
 package ru.skillbranch.skillarticles.viewmodels.article
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.skillbranch.skillarticles.data.models.ArticleData
-import ru.skillbranch.skillarticles.data.models.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.models.CommentItemData
 import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
 import ru.skillbranch.skillarticles.data.repositories.CommentsDataFactory
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.data.repositories.clearContent
 import ru.skillbranch.skillarticles.extensions.data.toAppSettings
-import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
-import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
+import ru.skillbranch.skillarticles.extensions.shortFormat
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
@@ -39,42 +37,27 @@ class ArticleViewModel(
 
     // 8: 01:05:35 подписываемся не на стэйт, а на отдельный метод репозитория - getArticleData(),
     // потому что комментарии не зависят от стэйта
-    private val listData: LiveData<PagedList<CommentItemData>> =
-        Transformations.switchMap(getArticleData()) {
-            buildPagedList(repository.allComments(articleId, it?.commentCount ?: 0))
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val listData: LiveData<PagedList<CommentItemData>> =
+        Transformations.switchMap(repository.findArticleCommentCount(articleId)) {
+            buildPagedList(repository.loadAllComments(articleId, it))
         }
 
     init {
-        // subscribe to mutable data
-
-        subscribeOnDataSource(getArticleData()) { article, state ->
-            article ?: return@subscribeOnDataSource null
+        // subscribe on mutable data
+        subscribeOnDataSource(repository.findArticle(articleId)) { article, state ->
+            if (article.content == null) fetchContent()
             state.copy(
                 shareLink = article.shareLink,
                 title = article.title,
-                category = article.category,
-                categoryIcon = article.categoryIcon,
-                date = article.date.format(),
-                author = article.author
-            )
-        }
-
-        subscribeOnDataSource(getArticleContent()) { content, state ->
-            // В лямбде обычный return не работает, он заставит выйти из функции, в которой лямбда вызвана.
-            // Чтобы выйти из лямбды, после return ставят метку - @lambda, указывающую на нужную лямбду
-
-            content ?: return@subscribeOnDataSource null
-            state.copy(
-                isLoadingContent = false,
-                content = content
-            )
-        }
-
-        subscribeOnDataSource(getArticlePersonalInfo()) { info, state ->
-            info ?: return@subscribeOnDataSource null
-            state.copy(
-                isBookmark = info.isBookmark,
-                isLike = info.isLike
+                category = article.category.title,
+                categoryIcon = article.category.icon,
+                date = article.date.shortFormat(),
+                author = article.author,
+                isBookmark = article.isBookmark,
+                isLike = article.isLike,
+                content = article.content ?: emptyList(),
+                isLoadingContent = article.content == null
             )
         }
 
@@ -94,19 +77,16 @@ class ArticleViewModel(
         }
     }
 
-    // load text from network
-    override fun getArticleContent(): LiveData<List<MarkdownElement>?> {
-        return repository.loadArticleContent(articleId)
+    private fun fetchContent() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.fetchArticleContent(articleId)
+        }
     }
 
-    // load data from db
-    override fun getArticleData(): LiveData<ArticleData?> {
-        return repository.getArticle(articleId)
-    }
-
-    // load data from db
-    override fun getArticlePersonalInfo(): LiveData<ArticlePersonalInfo?> {
-        return repository.loadArticlePersonalInfo(articleId)
+    // app settings
+    override fun handleNightMode() {
+        val settings = currentState.toAppSettings()
+        repository.updateSettings(settings.copy(isDarkMode = settings.isDarkMode.not()))
     }
 
     override fun handleUpText() {
@@ -119,43 +99,36 @@ class ArticleViewModel(
         repository.updateSettings(settings.copy(isBigText = false))
     }
 
-    override fun handleNightMode() {
-        val settings = currentState.toAppSettings()
-        repository.updateSettings(settings.copy(isDarkMode = settings.isDarkMode.not()))
+    // personal article info
+    override fun handleBookmark() {
+
+        val msg = if (!currentState.isBookmark) "Add to bookmarks" else "Remove from bookmarks"
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.toggleBookmark(articleId)
+            withContext(Dispatchers.Main) {
+                notify(Notify.TextMessage(msg))
+            }
+        }
     }
 
     override fun handleLike() {
-        val toggleLike = {
-            val info = currentState.toArticlePersonalInfo()
-            repository.updateArticlePersonalInfo(info.copy(isLike = info.isLike.not()))
-        }
-
-        toggleLike()
-
-        val msg = if (currentState.isLike) Notify.TextMessage("Mark is liked")
+        val isLiked = currentState.isLike
+        val msg = if (!isLiked) Notify.TextMessage("Mark is liked")
         else {
             Notify.ActionMessage(
                 "Don`t like it anymore",
-                "No, still like it",
-                toggleLike
-            )
+                "No, still like it"
+                // handler function, if press "No, still like it" on snackbar, then toggle again
+            ) { handleLike() }
+
         }
-
-        notify(msg)
-    }
-
-    override fun handleBookmark() {
-        val toggleBookmark = {
-            val info = currentState.toArticlePersonalInfo()
-            repository.updateArticlePersonalInfo(info.copy(isBookmark = info.isBookmark.not()))
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.toggleLike(articleId)
+            if (isLiked) repository.decrementLike(articleId) else repository.incrementLike(articleId)
+            withContext(Dispatchers.Main) {
+                notify(msg)
+            }
         }
-
-        toggleBookmark()
-
-        val msg = if (currentState.isBookmark) Notify.TextMessage("Add to bookmarks")
-        else Notify.TextMessage("Remove from bookmarks")
-
-        notify(msg)
     }
 
     override fun handleShare() {
@@ -163,6 +136,7 @@ class ArticleViewModel(
         notify(Notify.ErrorMessage(msg, "OK", null))
     }
 
+    // session state
     override fun handleToggleMenu() {
         updateState { it.copy(isShowMenu = it.isShowMenu.not()) }
     }
@@ -240,19 +214,22 @@ class ArticleViewModel(
     }
 
     override fun handleCommentInput(comment: String) {
-        updateState { it.copy(comment = comment) }
+        updateState { it.copy(commentText = comment) }
     }
 
     override fun handleSendComment(comment: String) {
-        if (comment.isEmpty()) return
-
+        if (comment.isEmpty()) {
+            notify(Notify.TextMessage("Comment must be not empty"))
+            return
+        }
+        updateState { it.copy(commentText = comment) }
         if (!currentState.isAuth) {
             navigate(NavigationCommand.StartLogin())
         } else {
-            viewModelScope.launch {
-                repository.sendComment(articleId, comment, currentState.answerToSlug)
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.sendMessage(articleId, currentState.commentText!!, currentState.answerToSlug)
                 withContext(Dispatchers.Main) {
-                    updateState { it.copy(answerTo = null, answerToSlug = null, comment = null) }
+                    updateState { it.copy(answerTo = null, answerToSlug = null, commentText = null) }
                 }
             }
         }
@@ -281,7 +258,7 @@ class ArticleViewModel(
     }
 
     fun handleClearComment() {
-        updateState { it.copy(answerTo = null, answerToSlug = null, comment = null) }
+        updateState { it.copy(answerTo = null, answerToSlug = null, commentText = null) }
     }
 
     fun handleReplyTo(slug: String, name: String) {
@@ -292,8 +269,8 @@ class ArticleViewModel(
 
 data class ArticleState(
     val isAuth: Boolean = false, // пользователь авторизован
-    val isLoadingContent: Boolean = true,
-    val isLoadingReviews: Boolean = true,
+    val isLoadingContent: Boolean = true, // контент загружается
+    val isLoadingReviews: Boolean = true, // отзывы загружаются
     val isLike: Boolean = false,
     val isBookmark: Boolean = false,
     val isShowMenu: Boolean = false,
@@ -301,7 +278,7 @@ data class ArticleState(
     val isDarkMode: Boolean = false,
     val isSearch: Boolean = false,
     val searchQuery: String? = null,
-    val searchResults: List<Pair<Int, Int>> = emptyList(),
+    val searchResults: List<Pair<Int, Int>> = emptyList(), // результаты поика (стартовая и конечная позиции)
     val searchPosition: Int = 0, // текущая позиция найденного результата
     val shareLink: String? = null,
     val title: String? = null,
@@ -315,7 +292,7 @@ data class ArticleState(
     val answerTo: String? = null,
     val answerToSlug: String? = null,
     val showBottomBar: Boolean = true, // чтобы не показывать боттомбар при написании комментария
-    val comment: String? = null
+    val commentText: String? = null
 ) : IViewModelState {
 
     override fun save(outState: SavedStateHandle) {
@@ -328,7 +305,7 @@ data class ArticleState(
         outState.set("commentsCount", commentsCount)
         outState.set("answerTo", answerTo)
         outState.set("answerToSlug", answerToSlug)
-        outState.set("showBottomBar", showBottomBar)
+        outState.set("showBottomBar", showBottomBar) // ? showBottomBar нет в коде урока ORM ROOM
     }
 
     override fun restore(savedState: SavedStateHandle): ArticleState {

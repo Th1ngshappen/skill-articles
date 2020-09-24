@@ -18,12 +18,12 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/wrap_login"
+        style="@style/Base.Widget.MaterialComponents.TextInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="56dp"
         android:layout_marginEnd="56dp"
         android:hint="Login"
-        style="@style/Base.Widget.MaterialComponents.TextInputLayout"
         android:theme="@style/TextInputLayoutAppearance"
         app:layout_constraintBottom_toTopOf="@id/wrap_password"
         app:layout_constraintEnd_toEndOf="parent"
@@ -40,12 +40,12 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/wrap_password"
+        style="@style/Base.Widget.MaterialComponents.TextInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="56dp"
         android:layout_marginEnd="56dp"
         android:hint="Password"
-        style="@style/Base.Widget.MaterialComponents.TextInputLayout"
         android:theme="@style/TextInputLayoutAppearance"
         app:layout_constraintBottom_toTopOf="@id/btn_login"
         app:layout_constraintEnd_toEndOf="parent"
@@ -76,26 +76,26 @@
         android:id="@+id/tv_privacy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/color_gray"
-        android:text="Privacy policy"
         android:bufferType="spannable"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_login"
+        android:text="Privacy policy"
+        android:textColor="@color/color_gray"
         app:layout_constraintBottom_toTopOf="@id/tv_access_code"
-        app:layout_constraintVertical_chainStyle="packed"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_login"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/tv_access_code"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/color_gray"
-        android:text="How to get authorization code"
         android:bufferType="spannable"
-        app:layout_constraintTop_toBottomOf="@id/tv_privacy"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="How to get authorization code"
+        android:textColor="@color/color_gray"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_privacy" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

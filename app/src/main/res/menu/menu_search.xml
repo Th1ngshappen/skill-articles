@@ -3,6 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <!-- можно было бы использовать app:actionViewClass=""
     и использовать там SearchView, но оно занимает не всю ширину -->
+
+    <item
+        android:id="@+id/action_filter"
+        android:title="@string/menu_filter_title" />
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_black_24dp"
