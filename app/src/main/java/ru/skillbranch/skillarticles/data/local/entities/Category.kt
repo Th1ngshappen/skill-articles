@@ -24,6 +24,7 @@ data class CategoryData(
     @ColumnInfo(name = "articles_count")
     val articlesCount: Int = 0
 ) : Parcelable {
+    // Parcelable, чтобы можно было передать в качестве аргумента при навигации
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,

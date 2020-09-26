@@ -57,6 +57,8 @@ class ArticleViewModel(
                 isBookmark = article.isBookmark,
                 isLike = article.isLike,
                 content = article.content ?: emptyList(),
+                source = article.source,
+                tags = article.tags,
                 isLoadingContent = article.content == null
             )
         }
@@ -288,6 +290,8 @@ data class ArticleState(
     val author: Any? = null, // автор статьи
     val poster: String? = null, // обложка статьи
     val content: List<MarkdownElement> = emptyList(), // контент
+    val source: String? = null,
+    val tags: List<String> = emptyList(),
     val commentsCount: Int = 0, // комментарии
     val answerTo: String? = null,
     val answerToSlug: String? = null,

@@ -10,7 +10,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.CursorAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.cursoradapter.widget.SimpleCursorAdapter
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,7 +30,7 @@ import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 
 class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
-    override val viewModel: ArticlesViewModel by viewModels()
+    override val viewModel: ArticlesViewModel by activityViewModels()
     override val layout: Int = R.layout.fragment_articles
     override val binding: ArticlesBinding by lazy { ArticlesBinding() }
     private val args: ArticlesFragmentArgs by navArgs()
@@ -53,7 +53,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
                 R.drawable.ic_filter_list_black_24dp,
                 null
             ) { _ ->
-                val action = ArticlesFragmentDirections.choseCategory(
+                val action = ArticlesFragmentDirections.chooseCategory(
                     binding.selectedCategories.toTypedArray(),
                     binding.categories.toTypedArray()
                 )
@@ -101,12 +101,18 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
+
         val menuItem = menu.findItem(R.id.action_search)
         val searchView = menuItem.actionView as SearchView
         if (binding.isSearch) {
             menuItem.expandActionView()
             searchView.setQuery(binding.searchQuery, false)
         }
+
+        val filterMenuItem = menu.findItem(R.id.action_filter)
+        val colorRes =
+            if (binding.selectedCategories.isEmpty()) R.color.color_on_article_bar else R.color.color_accent
+        filterMenuItem.icon.setTint(requireContext().getColor(colorRes))
 
         val autoTv = searchView.findViewById<AutoCompleteTextView>(R.id.search_src_text)
         autoTv.threshold = 1
@@ -204,7 +210,9 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
     inner class ArticlesBinding : Binding() {
         var categories: List<CategoryData> = emptyList()
         var selectedCategories: List<String> by RenderProp(emptyList()) {
-            // TODO selected color on icon
+            val filterMenuItem = toolbar.menu.findItem(R.id.action_filter) ?: return@RenderProp
+            val colorRes = if (it.isEmpty()) R.color.color_on_article_bar else R.color.color_accent
+            filterMenuItem.icon.setTint(requireContext().getColor(colorRes))
         }
         var searchQuery: String? = null
         var isSearch: Boolean = false

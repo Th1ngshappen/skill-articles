@@ -48,8 +48,8 @@
             android:id="@+id/action_to_page_article"
             app:destination="@id/page_article" />
         <action
-            android:id="@+id/chose_category"
-            app:destination="@id/nav_chose_category" />
+            android:id="@+id/choose_category"
+            app:destination="@id/nav_choose_category" />
     </fragment>
     <fragment
         android:id="@+id/nav_profile"
@@ -69,8 +69,8 @@
             android:id="@+id/action_to_page_article"
             app:destination="@id/page_article" />
         <action
-            android:id="@+id/chose_category"
-            app:destination="@id/nav_chose_category" />
+            android:id="@+id/choose_category"
+            app:destination="@id/nav_choose_category" />
     </fragment>
     <fragment
         android:id="@+id/nav_transcriptions"
@@ -78,7 +78,7 @@
         android:label="@string/title_transcriptions"
         tools:layout="@layout/fragment_transcriptions" />
     <dialog
-        android:id="@+id/nav_chose_category"
+        android:id="@+id/nav_choose_category"
         android:name="ru.skillbranch.skillarticles.ui.dialogs.ChoseCategoryDialog">
         <argument
             android:name="selectedCategories"

@@ -18,3 +18,8 @@ class MarkdownConverter {
     fun toMarkdown(content: String?): List<MarkdownElement>? =
         content?.let { MarkdownParser.parse(it) }
 }
+
+class ListConverter {
+    @TypeConverter
+    fun toList(str: String?): List<String> = str?.split(",") ?: emptyList()
+}

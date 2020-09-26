@@ -4,10 +4,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
@@ -25,11 +27,13 @@ import kotlinx.android.synthetic.main.layout_bottombar.view.*
 import kotlinx.android.synthetic.main.layout_submenu.view.*
 import kotlinx.android.synthetic.main.search_view_layout.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.repositories.Element
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.*
 import ru.skillbranch.skillarticles.ui.base.*
 import ru.skillbranch.skillarticles.ui.custom.ArticleSubmenu
 import ru.skillbranch.skillarticles.ui.custom.Bottombar
+import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownBuilder
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleViewModel
@@ -117,6 +121,15 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         tv_title.text = args.title
         tv_author.text = args.author
         tv_date.text = args.date.format()
+
+        tv_source.apply {
+            isVisible = false
+            movementMethod = LinkMovementMethod.getInstance()
+        }
+
+        tv_hashtags.apply {
+            isVisible = false
+        }
 
         et_comment.setOnEditorActionListener { view, _, _ ->
             root.hideKeyboard(view)
@@ -248,6 +261,8 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     // inner class - имеет доступ ко всем методам и свойствам своего outer класса
     inner class ArticleBinding : Binding() {
 
+        private val markdownBuilder = MarkdownBuilder(requireContext())
+
         // чтобы клавиатура тоже восстанавливала своё состояние, когда мы находимся в режиме поиска
         var isFocusedSearch: Boolean = false
         var searchQuery: String? = null
@@ -313,6 +328,34 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             if (it.isNotEmpty()) setupCopyListener()
         }
 
+        private var source: String by RenderProp("") {
+            tv_source.isVisible = it.isNotEmpty()
+            if (it.isEmpty()) return@RenderProp
+
+            markdownBuilder
+                .markdownToSpan(
+                    MarkdownElement.Text(
+                        mutableListOf(Element.Link(it, "Article source"))
+                    )
+                )
+                .run { tv_source.setText(this, TextView.BufferType.SPANNABLE) }
+        }
+
+        private var tags: List<String> by RenderProp(emptyList()) {
+            tv_hashtags.isVisible = it.isNotEmpty()
+            if (it.isEmpty()) return@RenderProp
+
+            markdownBuilder
+                .markdownToSpan(
+                    MarkdownElement.Text(
+                        it.flatMap { tag ->
+                            listOf(Element.InlineCode(tag), Element.Text(" "))
+                        }.toMutableList()
+                    )
+                )
+                .run { tv_hashtags.setText(this, TextView.BufferType.SPANNABLE) }
+        }
+
         private var comment by RenderProp("") {
             with(et_comment) {
                 if (text.toString() != it) setText(it)
@@ -362,6 +405,8 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             isDarkMode = data.isDarkMode
 
             content = data.content
+            source = data.source ?: ""
+            tags = data.tags
 
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch
