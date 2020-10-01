@@ -1,4 +1,4 @@
-ext{
+ext {
     // Build -> Edit Libraries and Dependencies
     //
     // Settings -> Inspections -> Lint -> Newer Library Versions Available (search "newer")
@@ -12,4 +12,7 @@ ext{
     glide_version = "4.11.0"
     material_version = "1.1.0"
     room_version = "2.2.5"
+    retofit_version = "2.9.0"
+    okhttp_version = "4.8.1"
+    moshi_version = "1.9.3"
 }

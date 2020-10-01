@@ -21,10 +21,7 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import kotlinx.android.synthetic.main.activity_root.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
-import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
-import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
-import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
-import ru.skillbranch.skillarticles.viewmodels.base.Notify
+import ru.skillbranch.skillarticles.viewmodels.base.*
 
 abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatActivity() {
 
@@ -48,6 +45,7 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
         viewModel.observeState(this) { subscribeOnState(it) }
         viewModel.observeNotifications(this) { renderNotification(it) }
         viewModel.observeNavigation(this) { subscribeOnNavigation(it) }
+        viewModel.observeLoading(this) { renderLoading(it) }
 
         navController = findNavController(R.id.nav_host_fragment)
     }
@@ -91,20 +89,25 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
             }
         }
     }
+
+    open fun renderLoading(loadingState: Loading) {
+        when (loadingState) {
+            Loading.SHOW_LOADING -> progress.isVisible = true
+            Loading.SHOW_BLOCKING_LOADING -> {
+                progress.isVisible = true
+                // TODO block interact with UI
+            }
+            Loading.HIDE_LOADING -> progress.isVisible = false
+        }
+    }
 }
 
 class ToolbarBuilder() {
 
-    var title: String? = null
     var subtitle: String? = null
     var logo: String? = null
     var visibility: Boolean = true
     val items: MutableList<MenuItemHolder> = mutableListOf()
-
-    fun setTitle(title: String): ToolbarBuilder {
-        this.title = title
-        return this
-    }
 
     fun setSubtitle(subtitle: String): ToolbarBuilder {
         this.subtitle = subtitle
@@ -128,7 +131,6 @@ class ToolbarBuilder() {
 
     // set default values
     fun invalidate(): ToolbarBuilder {
-        this.title = null
         this.subtitle = null
         this.logo = null
         this.visibility = true
@@ -148,7 +150,6 @@ class ToolbarBuilder() {
         context.appbar.setExpanded(true, true)
 
         with(context.toolbar) {
-            if (this@ToolbarBuilder.title != null) title = this@ToolbarBuilder.title
             subtitle = this@ToolbarBuilder.subtitle
             if (this@ToolbarBuilder.logo != null) {
                 val logoSize = context.dpToIntPx(40)

@@ -4,31 +4,36 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.sqlite.db.SimpleSQLiteQuery
-import ru.skillbranch.skillarticles.data.NetworkDataHolder
 import ru.skillbranch.skillarticles.data.local.DbManager.db
 import ru.skillbranch.skillarticles.data.local.dao.*
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 import ru.skillbranch.skillarticles.data.local.entities.ArticleTagXRef
 import ru.skillbranch.skillarticles.data.local.entities.CategoryData
 import ru.skillbranch.skillarticles.data.local.entities.Tag
+import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.res.ArticleRes
 import ru.skillbranch.skillarticles.extensions.data.toArticle
+import ru.skillbranch.skillarticles.extensions.data.toArticleContent
 import ru.skillbranch.skillarticles.extensions.data.toArticleCounts
+import ru.skillbranch.skillarticles.extensions.data.toCategory
 
 interface IArticlesRepository {
-    fun loadArticlesFromNetwork(start: Int = 0, size: Int): List<ArticleRes>
-    fun insertArticlesToDb(articles: List<ArticleRes>)
-    fun toggleBookmark(articleId: String)
     fun findTags(): LiveData<List<String>>
     fun findCategoriesData(): LiveData<List<CategoryData>>
     fun rawQueryArticles(filter: ArticleFilter): DataSource.Factory<Int, ArticleItem>
-    fun incrementTagUseCount(tag: String)
+    suspend fun incrementTagUseCount(tag: String)
+    suspend fun loadArticlesFromNetwork(start: String? = null, size: Int = 10): Int
+    suspend fun toggleBookmark(articleId: String): Boolean
+    suspend fun findLastArticleId(): String?
+    suspend fun fetchArticleContent(articleId: String)
+    suspend fun removeArticleContent(articleId: String)
 }
 
 object ArticlesRepository : IArticlesRepository {
 
-    private val network = NetworkDataHolder
+    private val network = NetworkManager.api
     private var articlesDao = db.articlesDao()
+    private var articlesContentDao = db.articleContentsDao()
     private var articleCountsDao = db.articleCountsDao()
     private var categoriesDao = db.categoriesDao()
     private var tagsDao = db.tagsDao()
@@ -40,40 +45,15 @@ object ArticlesRepository : IArticlesRepository {
         articleCountsDao: ArticleCountsDao,
         categoriesDao: CategoriesDao,
         tagsDao: TagsDao,
-        articlePersonalDao: ArticlePersonalInfosDao
+        articlePersonalDao: ArticlePersonalInfosDao,
+        articlesContentDao: ArticleContentsDao
     ) {
         this.articlesDao = articlesDao
         this.articleCountsDao = articleCountsDao
         this.categoriesDao = categoriesDao
         this.tagsDao = tagsDao
         this.articlePersonalDao = articlePersonalDao
-    }
-
-    override fun loadArticlesFromNetwork(start: Int, size: Int): List<ArticleRes> =
-        network.findArticlesItem(start, size)
-
-    override fun insertArticlesToDb(articles: List<ArticleRes>) {
-        articlesDao.upsert(articles.map { it.data.toArticle() })
-        articleCountsDao.upsert(articles.map { it.counts.toArticleCounts() })
-
-        val refs = articles.map { it.data }
-            .fold(mutableListOf<Pair<String, String>>()) { acc, res ->
-                acc.also { list -> list.addAll(res.tags.map { res.id to it }) }
-            }
-
-        val tags = refs.map { it.second }
-            .distinct()
-            .map { Tag(it) }
-
-        val categories = articles.map { it.data.category }
-
-        categoriesDao.insert(categories)
-        tagsDao.insert(tags)
-        tagsDao.insertRefs(refs.map { ArticleTagXRef(it.first, it.second) })
-    }
-
-    override fun toggleBookmark(articleId: String) {
-        articlePersonalDao.toggleBookmarkOrInsert(articleId)
+        this.articlesContentDao = articlesContentDao
     }
 
     override fun findTags(): LiveData<List<String>> {
@@ -88,8 +68,49 @@ object ArticlesRepository : IArticlesRepository {
         return articlesDao.findArticlesByRaw(SimpleSQLiteQuery(filter.toQuery()))
     }
 
-    override fun incrementTagUseCount(tag: String) {
+    override suspend fun incrementTagUseCount(tag: String) {
         tagsDao.incrementTagUseCount(tag)
+    }
+
+    override suspend fun loadArticlesFromNetwork(start: String?, size: Int): Int {
+        val items = network.articles(start, size)
+        if (items.isNotEmpty()) insertArticlesToDb(items)
+        return items.size
+    }
+
+    override suspend fun toggleBookmark(articleId: String): Boolean {
+        return articlePersonalDao.toggleBookmarkOrInsert(articleId)
+    }
+
+    override suspend fun findLastArticleId(): String? = articlesDao.findLastArticleId()
+
+    override suspend fun fetchArticleContent(articleId: String) {
+        val content = network.loadArticleContent(articleId)
+        articlesContentDao.insert(content.toArticleContent())
+    }
+
+    override suspend fun removeArticleContent(articleId: String) {
+        articlesContentDao.deleteById(articleId)
+    }
+
+    private suspend fun insertArticlesToDb(articles: List<ArticleRes>) {
+        articlesDao.upsert(articles.map { it.data.toArticle() })
+        articleCountsDao.upsert(articles.map { it.counts.toArticleCounts() })
+
+        val refs = articles.map { it.data }
+            .fold(mutableListOf<Pair<String, String>>()) { acc, res ->
+                acc.also { list -> list.addAll(res.tags.map { res.id to it }) }
+            }
+
+        val tags = refs.map { it.second }
+            .distinct()
+            .map { Tag(it) }
+
+        val categories = articles.map { it.data.category.toCategory() }
+
+        categoriesDao.insert(categories)
+        tagsDao.insert(tags)
+        tagsDao.insertRefs(refs.map { ArticleTagXRef(it.first, it.second) })
     }
 
 }
@@ -111,7 +132,7 @@ class ArticleFilter(
             qb.appendWhere("refs.t_id = '$search'")
         }
         if (isBookmark) qb.appendWhere("is_bookmark = 1")
-        if (categories.isNotEmpty()) qb.appendWhere("category_id IN (${categories.joinToString(",")})")
+        if (categories.isNotEmpty()) qb.appendWhere("category_id IN (${categories.joinToString(",") { "'$it'" }})")
 
         qb.orderBy("date")
         return qb.build()

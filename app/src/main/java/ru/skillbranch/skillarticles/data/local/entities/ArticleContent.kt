@@ -15,7 +15,6 @@ import java.util.*
         onDelete = ForeignKey.CASCADE
     )]
 )
-
 data class ArticleContent(
     @PrimaryKey
     @ColumnInfo(name = "article_id")

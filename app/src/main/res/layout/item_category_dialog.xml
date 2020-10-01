@@ -29,7 +29,7 @@
         android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:textSize="18sp"
-        tools:text="Article category" />
+        tools:text="Category title" />
 
     <TextView
         android:id="@+id/tv_count"

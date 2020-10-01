@@ -4,10 +4,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import ru.skillbranch.skillarticles.data.models.CommentItemData
+import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
 import ru.skillbranch.skillarticles.data.repositories.CommentsDataFactory
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
@@ -38,9 +36,9 @@ class ArticleViewModel(
     // 8: 01:05:35 подписываемся не на стэйт, а на отдельный метод репозитория - getArticleData(),
     // потому что комментарии не зависят от стэйта
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    val listData: LiveData<PagedList<CommentItemData>> =
+    val listData: LiveData<PagedList<CommentRes>> =
         Transformations.switchMap(repository.findArticleCommentCount(articleId)) {
-            buildPagedList(repository.loadAllComments(articleId, it))
+            buildPagedList(repository.loadAllComments(articleId, it, ::commentLoadErrorHandler))
         }
 
     init {
@@ -58,7 +56,7 @@ class ArticleViewModel(
                 isLike = article.isLike,
                 content = article.content ?: emptyList(),
                 source = article.source,
-                tags = article.tags,
+                hashtags = article.tags,
                 isLoadingContent = article.content == null
             )
         }
@@ -79,8 +77,22 @@ class ArticleViewModel(
         }
     }
 
+    fun refresh() {
+        launchSafety {
+            // этот CoroutineScope принадлежит вью модели
+            // 11: 1:43:25 благодаря тому, что используется контекст корутины,
+            // мы можем вот так параллельно вызвать несколько запросов
+            launch { repository.fetchArticleContent(articleId) }
+            launch { repository.refreshCommentsCount(articleId) }
+        }
+    }
+
+    private fun commentLoadErrorHandler(throwable: Throwable) {
+        // handle network errors
+    }
+
     private fun fetchContent() {
-        viewModelScope.launch(Dispatchers.IO) {
+        launchSafety {
             repository.fetchArticleContent(articleId)
         }
     }
@@ -103,34 +115,32 @@ class ArticleViewModel(
 
     // personal article info
     override fun handleBookmark() {
+        launchSafety {
+            val isBookmarked = repository.toggleBookmark(articleId)
+            if (isBookmarked) repository.addBookmark(articleId)
+            else repository.removeBookmark(articleId)
 
-        val msg = if (!currentState.isBookmark) "Add to bookmarks" else "Remove from bookmarks"
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.toggleBookmark(articleId)
-            withContext(Dispatchers.Main) {
-                notify(Notify.TextMessage(msg))
-            }
+            val msg = if (isBookmarked) "Add to bookmarks" else "Remove from bookmarks"
+            notify(Notify.TextMessage(msg))
         }
     }
 
     override fun handleLike() {
-        val isLiked = currentState.isLike
-        val msg = if (!isLiked) Notify.TextMessage("Mark is liked")
-        else {
-            Notify.ActionMessage(
+        launchSafety {
+            val isLiked = repository.toggleLike(articleId)
+            if (isLiked) repository.incrementLike(articleId)
+            else repository.decrementLike(articleId)
+
+            val msg = if (isLiked) Notify.TextMessage("Article marked as liked")
+            else Notify.ActionMessage(
                 "Don`t like it anymore",
                 "No, still like it"
                 // handler function, if press "No, still like it" on snackbar, then toggle again
             ) { handleLike() }
 
+            notify(msg)
         }
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.toggleLike(articleId)
-            if (isLiked) repository.decrementLike(articleId) else repository.incrementLike(articleId)
-            withContext(Dispatchers.Main) {
-                notify(msg)
-            }
-        }
+
     }
 
     override fun handleShare() {
@@ -228,26 +238,35 @@ class ArticleViewModel(
         if (!currentState.isAuth) {
             navigate(NavigationCommand.StartLogin())
         } else {
-            viewModelScope.launch(Dispatchers.IO) {
-                repository.sendMessage(articleId, currentState.commentText!!, currentState.answerToSlug)
-                withContext(Dispatchers.Main) {
-                    updateState { it.copy(answerTo = null, answerToSlug = null, commentText = null) }
+            launchSafety(null, {
+                updateState {
+                    it.copy(
+                        answerTo = null,
+                        answerToMessageId = null,
+                        commentText = null
+                    )
                 }
+            }) {
+                repository.sendMessage(
+                    articleId,
+                    currentState.commentText!!,
+                    currentState.answerToMessageId
+                )
             }
         }
     }
 
     fun observeList(
         owner: LifecycleOwner,
-        onChange: (list: PagedList<CommentItemData>) -> Unit
+        onChange: (list: PagedList<CommentRes>) -> Unit
     ) {
         listData.observe(owner, Observer { onChange(it) })
     }
 
     private fun buildPagedList(
         dataFactory: CommentsDataFactory
-    ): LiveData<PagedList<CommentItemData>> {
-        return LivePagedListBuilder<String, CommentItemData>(
+    ): LiveData<PagedList<CommentRes>> {
+        return LivePagedListBuilder<String, CommentRes>(
             dataFactory,
             listConfig
         )
@@ -260,11 +279,11 @@ class ArticleViewModel(
     }
 
     fun handleClearComment() {
-        updateState { it.copy(answerTo = null, answerToSlug = null, commentText = null) }
+        updateState { it.copy(answerTo = null, answerToMessageId = null, commentText = null) }
     }
 
-    fun handleReplyTo(slug: String, name: String) {
-        updateState { it.copy(answerToSlug = slug, answerTo = "Reply to $name") }
+    fun handleReplyTo(messageId: String, name: String) {
+        updateState { it.copy(answerToMessageId = messageId, answerTo = "Reply to $name") }
     }
 
 }
@@ -290,13 +309,13 @@ data class ArticleState(
     val author: Any? = null, // автор статьи
     val poster: String? = null, // обложка статьи
     val content: List<MarkdownElement> = emptyList(), // контент
-    val source: String? = null,
-    val tags: List<String> = emptyList(),
     val commentsCount: Int = 0, // комментарии
     val answerTo: String? = null,
-    val answerToSlug: String? = null,
+    val answerToMessageId: String? = null,
     val showBottomBar: Boolean = true, // чтобы не показывать боттомбар при написании комментария
-    val commentText: String? = null
+    val commentText: String? = null,
+    val source: String? = null, // источник контента
+    val hashtags: List<String> = emptyList() // хэтеги контента
 ) : IViewModelState {
 
     override fun save(outState: SavedStateHandle) {
@@ -308,8 +327,7 @@ data class ArticleState(
         outState.set("searchPosition", searchPosition)
         outState.set("commentsCount", commentsCount)
         outState.set("answerTo", answerTo)
-        outState.set("answerToSlug", answerToSlug)
-        outState.set("showBottomBar", showBottomBar) // ? showBottomBar нет в коде урока ORM ROOM
+        outState.set("answerToMessageId", answerToMessageId)
     }
 
     override fun restore(savedState: SavedStateHandle): ArticleState {
@@ -321,8 +339,7 @@ data class ArticleState(
             searchPosition = savedState["searchPosition"] ?: 0,
             commentsCount = savedState["commentsCount"] ?: 0,
             answerTo = savedState["answerTo"],
-            answerToSlug = savedState["answerToSlug"],
-            showBottomBar = savedState["showBottomBar"] ?: true
+            answerToMessageId = savedState["answerToMessageId"]
         )
     }
 }

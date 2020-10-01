@@ -13,7 +13,7 @@ class RootViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle,
     private val privateRoutes = listOf(R.id.nav_profile)
 
     init {
-        subscribeOnDataSource(preferences.isAuth()) { isAuth, state ->
+        subscribeOnDataSource(preferences.isAuthLive) { isAuth, state ->
             state.copy(isAuth = isAuth)
         }
     }
