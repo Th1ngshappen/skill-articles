@@ -24,7 +24,7 @@ class AvatarActionsDialog: BottomSheetDialogFragment() {
         const val DELETE_KEY = "DELETE_KEY"
     }
 
-    private val args: AvatarActionDialogArgs by navArgs()
+    private val args: AvatarActionsDialogArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
