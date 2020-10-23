@@ -31,7 +31,6 @@ import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesState
 import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Loading
-import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 
 class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
@@ -61,7 +60,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
                     binding.selectedCategories.toTypedArray(),
                     binding.categories.toTypedArray()
                 )
-                viewModel.navigate(action)
+                viewModel.navigateWithAction(action)
             }
         )
     }
@@ -83,7 +82,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
                     item.title
                 )
 
-                viewModel.navigate(action)
+                viewModel.navigateWithAction(action)
             }
         }
 

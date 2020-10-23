@@ -90,7 +90,7 @@ class ProfileFragment() : BaseFragment<ProfileViewModel>() {
             ) {
                 val action = ProfileFragmentDirections
                     .actionNavProfileToDialogEditProfile(binding.name, binding.about)
-                viewModel.navigate(action)
+                viewModel.navigateWithAction(action)
             }
         )
         addMenuItem(
@@ -173,7 +173,7 @@ class ProfileFragment() : BaseFragment<ProfileViewModel>() {
         iv_avatar.setOnClickListener {
             val action =
                 ProfileFragmentDirections.actionNavProfileToDialogAvatarActions(binding.avatar.isNotBlank())
-            viewModel.navigate(action)
+            viewModel.navigateWithAction(action)
         }
 
         viewModel.observePermissions(viewLifecycleOwner) {

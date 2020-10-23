@@ -10,7 +10,6 @@ import ru.skillbranch.skillarticles.viewmodels.auth.AuthViewModel
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.attrValue
 import ru.skillbranch.skillarticles.ui.custom.spans.UnderlineSpan
-import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 
 class AuthFragment : BaseFragment<AuthViewModel>() {
 
@@ -22,12 +21,12 @@ class AuthFragment : BaseFragment<AuthViewModel>() {
 
         tv_privacy.setOnClickListener {
             val action = AuthFragmentDirections.actionNavAuthToPagePrivacyPolicy()
-            viewModel.navigate(action)
+            viewModel.navigateWithAction(action)
         }
 
         tv_register.setOnClickListener {
             val action = AuthFragmentDirections.actionNavAuthToNavRegister(args.privateDestination)
-            viewModel.navigate(action)
+            viewModel.navigateWithAction(action)
         }
 
         btn_login.setOnClickListener {

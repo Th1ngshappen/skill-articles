@@ -63,7 +63,8 @@ abstract class BaseViewModel<T : IViewModelState>(
      * соответственно при изменении конфигурации и пересоздании Activity уведомление не будет вызвано повторно
      */
     @UiThread
-    protected fun notify(content: Notify) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    fun notify(content: Notify) {
         notifications.value = Event(content)
     }
 
@@ -85,7 +86,7 @@ abstract class BaseViewModel<T : IViewModelState>(
         navigation.value = Event(command)
     }
 
-    fun navigate(navDirections: NavDirections) {
+    fun navigateWithAction(navDirections: NavDirections) {
         navigate(NavigationCommand.To(navDirections.actionId, navDirections.arguments))
     }
 
