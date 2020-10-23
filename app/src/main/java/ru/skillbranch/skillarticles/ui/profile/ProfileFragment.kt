@@ -32,10 +32,9 @@ import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.base.MenuItemHolder
 import ru.skillbranch.skillarticles.ui.base.ToolbarBuilder
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
-import ru.skillbranch.skillarticles.ui.dialogs.AvatarActionDialog
+import ru.skillbranch.skillarticles.ui.dialogs.AvatarActionsDialog
 import ru.skillbranch.skillarticles.ui.dialogs.EditProfileDialog
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
-import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 import ru.skillbranch.skillarticles.viewmodels.profile.PendingAction
 import ru.skillbranch.skillarticles.viewmodels.profile.ProfileState
 import ru.skillbranch.skillarticles.viewmodels.profile.ProfileViewModel
@@ -127,12 +126,12 @@ class ProfileFragment() : BaseFragment<ProfileViewModel>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // listen for fragment result
-        setFragmentResultListener(AvatarActionDialog.AVATAR_ACTIONS_KEY) { _, bundle ->
-            when (bundle[AvatarActionDialog.SELECT_ACTION_KEY] as String) {
-                AvatarActionDialog.CAMERA_KEY -> viewModel.handleCameraAction(prepareTempUri())
-                AvatarActionDialog.GALLERY_KEY -> viewModel.handleGalleryAction()
-                AvatarActionDialog.DELETE_KEY -> viewModel.handleDeleteAction()
-                AvatarActionDialog.EDIT_KEY -> {
+        setFragmentResultListener(AvatarActionsDialog.AVATAR_ACTIONS_KEY) { _, bundle ->
+            when (bundle[AvatarActionsDialog.SELECT_ACTION_KEY] as String) {
+                AvatarActionsDialog.CAMERA_KEY -> viewModel.handleCameraAction(prepareTempUri())
+                AvatarActionsDialog.GALLERY_KEY -> viewModel.handleGalleryAction()
+                AvatarActionsDialog.DELETE_KEY -> viewModel.handleDeleteAction()
+                AvatarActionsDialog.EDIT_KEY -> {
                     lifecycleScope.launch(Dispatchers.IO) {
                         // глайд хэширует изображение в кэше приложения
                         // получаем это изображение из кэша

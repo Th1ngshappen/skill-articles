@@ -21,8 +21,8 @@ object RootRepository {
     }
 
     suspend fun register(name: String, login: String, password: String) {
-        val auth = network.register(RegisterReq(name, login, password))
-        updatePreferences(auth)
+        /*val auth = network.register(RegisterReq(name, login, password))
+        updatePreferences(auth)*/
     }
 
     private fun updatePreferences(auth: AuthRes) {

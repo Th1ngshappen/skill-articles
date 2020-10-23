@@ -13,7 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.bottom_sheet.*
 import ru.skillbranch.skillarticles.R
 
-class AvatarActionDialog: BottomSheetDialogFragment() {
+class AvatarActionsDialog: BottomSheetDialogFragment() {
 
     companion object {
         const val AVATAR_ACTIONS_KEY = "AVATAR_ACTIONS_KEY" // для result listener'а

@@ -101,7 +101,7 @@
     </dialog>
     <dialog
         android:id="@+id/dialog_avatar_actions"
-        android:name="ru.skillbranch.skillarticles.ui.dialogs.AvatarActionDialog">
+        android:name="ru.skillbranch.skillarticles.ui.dialogs.AvatarActionsDialog">
         <argument
             android:name="has_avatar"
             app:argType="boolean" />
