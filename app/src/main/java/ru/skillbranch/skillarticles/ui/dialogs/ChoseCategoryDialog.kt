@@ -3,24 +3,24 @@ package ru.skillbranch.skillarticles.ui.dialogs
 import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
-import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesViewModel
 
 // 10: 02:31:35, 11: 55:19
 class ChoseCategoryDialog : DialogFragment() {
 
     companion object {
-        private const val SELECTED_CATEGORIES = "SELECTED_CATEGORIES"
+        const val CHOOSE_CATEGORY_KEY = "CHOOSE_CATEGORY_KEY"
+        const val SELECTED_CATEGORIES = "SELECTED_CATEGORIES"
     }
 
-    private val viewModel: ArticlesViewModel by activityViewModels()
     private val selectedCategories = mutableSetOf<String>()
     private val args: ChoseCategoryDialogArgs by navArgs()
 
@@ -44,7 +44,7 @@ class ChoseCategoryDialog : DialogFragment() {
 
         val rvCategories = RecyclerView(requireContext()).apply {
             id = R.id.categories_list
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = categoryAdapter
             setPaddingOptionally(top = requireContext().dpToIntPx(16))
         }
@@ -53,10 +53,16 @@ class ChoseCategoryDialog : DialogFragment() {
             .setView(rvCategories)
             .setTitle("Choose category")
             .setPositiveButton("Apply") { _, _ ->
-                viewModel.applyCategories(selectedCategories.toList())
+                setFragmentResult(
+                    CHOOSE_CATEGORY_KEY,
+                    bundleOf(SELECTED_CATEGORIES to selectedCategories.toList())
+                )
             }
             .setNegativeButton("Reset") { _, _ ->
-                viewModel.applyCategories(emptyList())
+                setFragmentResult(
+                    CHOOSE_CATEGORY_KEY,
+                    bundleOf(SELECTED_CATEGORIES to emptyList<String>())
+                )
             }
             .create()
     }

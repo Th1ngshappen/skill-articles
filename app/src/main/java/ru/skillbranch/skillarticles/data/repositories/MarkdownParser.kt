@@ -98,8 +98,8 @@ object MarkdownParser {
         var lastStartIndex = 0
 
         loop@ while (matcher.find(lastStartIndex)) {
-            val startIndex = matcher.start()
-            val endIndex = matcher.end()
+                val startIndex = matcher.start()
+                val endIndex = matcher.end()
 
             // if something is found then everything before - TEXT
             if (lastStartIndex < startIndex) {

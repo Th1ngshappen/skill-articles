@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- пути, которые мы будем использовать для шэринга во внешний мир -->
+    <!-- path="." - в контексте Unix - та же директория, в которой находишься в текущий момент -->
+    <external-path
+        name="external_files"
+        path="." />
+    <!-- директория, чтобы делиться нашим кэшем, потому что Glide сохраняет изображения в кэш -->
+    <cache-path
+        name="share"
+        path="image_manager_disk_cache" />
+</paths>

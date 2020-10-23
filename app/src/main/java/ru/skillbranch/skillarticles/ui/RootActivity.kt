@@ -1,7 +1,9 @@
 package ru.skillbranch.skillarticles.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.snackbar.Snackbar
@@ -37,7 +39,7 @@ class RootActivity : BaseActivity<RootViewModel>() {
 
         nav_view.setOnNavigationItemSelectedListener {
             // if click on bottom navigation item -> navigate to destination using item id
-            viewModel.navigate(NavigationCommand.To(it.itemId))
+            viewModel.navigate(NavigationCommand.To(destination = it.itemId))
             true
         }
 

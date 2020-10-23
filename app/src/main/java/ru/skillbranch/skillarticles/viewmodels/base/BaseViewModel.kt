@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
+import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -25,6 +26,9 @@ abstract class BaseViewModel<T : IViewModelState>(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val navigation = MutableLiveData<Event<NavigationCommand>>()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    val permissions = MutableLiveData<Event<List<String>>>()
 
     private val loading = MutableLiveData<Loading>(Loading.HIDE_LOADING)
 
@@ -48,7 +52,8 @@ abstract class BaseViewModel<T : IViewModelState>(
     // лямбда-выражение принимает в качестве аргумента лямбду, в которую передаётся текущее состояние
     // и она возвращает модифицированное состояние, которое присваивается текущему состоянию
     @UiThread
-    protected inline fun updateState(update: (currentState: T) -> T) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    inline fun updateState(update: (currentState: T) -> T) {
         val updatedState: T = update(currentState)
         state.value = updatedState
     }
@@ -78,6 +83,10 @@ abstract class BaseViewModel<T : IViewModelState>(
 
     open fun navigate(command: NavigationCommand) {
         navigation.value = Event(command)
+    }
+
+    fun navigate(navDirections: NavDirections) {
+        navigate(NavigationCommand.To(navDirections.actionId, navDirections.arguments))
     }
 
     // более компактная форма записи observe() метода LiveData; принимает последним аргументом
@@ -173,6 +182,14 @@ abstract class BaseViewModel<T : IViewModelState>(
         }
     }
 
+    fun requestPermissions(requestedPermissions: List<String>) {
+        permissions.value = Event(requestedPermissions)
+    }
+
+    fun observePermissions(owner: LifecycleOwner, handle: (permissions: List<String>) -> Unit) {
+        permissions.observe(owner, EventObserver { handle(it) })
+    }
+
 }
 
 class Event<out E>(private val content: E) {
@@ -247,6 +264,9 @@ sealed class NavigationCommand() {
     data class FinishLogin(
         val privateDestination: Int? = null
     ) : NavigationCommand()
+
+    object Logout: NavigationCommand()
+
 }
 
 enum class Loading {

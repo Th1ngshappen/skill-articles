@@ -3,5 +3,7 @@
 
     <item name="tv_comment_body" type="id" />
     <item name="categories_list" type="id" />
+    <item name="action_edit" type="id" />
+    <item name="action_logout" type="id" />
 
 </resources>

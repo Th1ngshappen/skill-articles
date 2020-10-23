@@ -2,6 +2,7 @@ package ru.skillbranch.skillarticles.ui.base
 
 import android.os.Bundle
 import android.view.*
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.android.synthetic.main.activity_root.*
@@ -11,12 +12,20 @@ import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Loading
 
 abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment() {
+
+    // mock root for testing
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    var _mockRoot: RootActivity? = null
+
     val root: RootActivity
         // обязательно через get(), чтобы получить ссылку на активити в момент обращения, а не инициализации
-        get() = activity as RootActivity
-    open val binding: Binding? = null
-    protected abstract val viewModel: T
+        get() = _mockRoot ?: activity as RootActivity
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    abstract val viewModel: T
     protected abstract val layout: Int
+
+    open val binding: Binding? = null
 
     open val prepareToolbar: (ToolbarBuilder.() -> Unit)? = null
     open val prepareBottombar: (BottombarBuilder.() -> Unit)? = null
@@ -37,17 +46,6 @@ abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // prepare toolbar
-        root.toolbarBuilder
-            .invalidate()
-            .prepare(prepareToolbar)
-            .build(root)
-
-        root.bottombarBuilder
-            .invalidate()
-            .prepare(prepareBottombar)
-            .build(root)
-
         // restore state
         viewModel.restoreState()
         binding?.restoreUi(savedInstanceState)
@@ -61,11 +59,32 @@ abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment()
         viewModel.observeNavigation(viewLifecycleOwner) { root.viewModel.navigate(it) }
         viewModel.observeLoading(viewLifecycleOwner) { renderLoading(it) }
 
-        setupViews()
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
+
+        // 12: 53:40
+        // prepare toolbar & bottombar, setupViews() перенесли сюда из onViewCreated
+        // потому что с новой версией activity и fragment result немного изменились вызовы callback'ов:
+        // метод onViewCreated теперь вызывается раньше, чем onCreate активити
+        // и получится обращение к ещё не существующим вью
+        // onViewStateRestored будет вызван точно тогда, когда lifecycle находится в onResumed стэйте
+
+        // prepare toolbar
+        root.toolbarBuilder
+            .invalidate()
+            .prepare(prepareToolbar)
+            .build(root)
+
+        // prepare bottombar
+        root.bottombarBuilder
+            .invalidate()
+            .prepare(prepareBottombar)
+            .build(root)
+
+        setupViews()
+
         binding?.rebind()
     }
 

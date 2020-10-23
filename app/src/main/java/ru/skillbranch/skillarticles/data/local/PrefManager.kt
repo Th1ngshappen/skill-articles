@@ -30,7 +30,6 @@ object PrefManager {
     val isAuthLive: LiveData<Boolean> by lazy {
         val token by PrefLiveDelegate("accessToken", "", preferences)
         token.map { it.isNotEmpty() } // по наличию токена определяем авторизацию
-        // TODO при logout стереть токен авторизации и refresh token
         // .map - одна из новых extension-функций для трансформации LiveData
         // по факту, внутри - Transformations.map
     }

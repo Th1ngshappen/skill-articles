@@ -14,6 +14,7 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions.circleCropTransform
@@ -86,6 +87,12 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
                     R.id.start_login,
                     bundleOf("private_destination" to (command.privateDestination ?: -1))
                 )
+            }
+
+            is NavigationCommand.Logout -> {
+                do {
+                    val result = navController.popBackStack(R.id.nav_profile, true)
+                } while (result)
             }
         }
     }

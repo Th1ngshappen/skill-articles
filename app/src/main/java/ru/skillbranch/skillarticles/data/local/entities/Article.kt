@@ -42,7 +42,6 @@ data class Author(
         LEFT JOIN article_personal_infos AS personal ON personal.article_id = id
     """
 )
-
 data class ArticleItem(
     val id: String,
     val date: Date = Date(),

@@ -1,6 +1,5 @@
 package ru.skillbranch.skillarticles
 
-import android.app.Instrumentation.newApplication
 import android.app.Application
 import android.content.Context
 import androidx.test.runner.AndroidJUnitRunner

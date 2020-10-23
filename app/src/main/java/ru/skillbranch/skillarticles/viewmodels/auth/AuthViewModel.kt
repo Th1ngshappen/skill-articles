@@ -5,6 +5,8 @@ import ru.skillbranch.skillarticles.data.repositories.RootRepository
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
+import ru.skillbranch.skillarticles.viewmodels.base.Notify
+import kotlin.math.log
 
 class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle, AuthState()) {
     private val repository = RootRepository
@@ -21,6 +23,14 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
             navigate(NavigationCommand.FinishLogin(dest))
         }
     }
+
+    fun handleRegister(name: String, login: String, password: String, dest: Int?) {
+        launchSafety {
+            repository.register(name, login, password)
+            navigate(NavigationCommand.FinishLogin(dest))
+        }
+    }
+
 }
 
 data class AuthState(val isAuth: Boolean = false) : IViewModelState

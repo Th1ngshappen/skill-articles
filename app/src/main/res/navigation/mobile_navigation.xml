@@ -49,13 +49,25 @@
             app:destination="@id/page_article" />
         <action
             android:id="@+id/choose_category"
-            app:destination="@id/nav_choose_category" />
+            app:destination="@id/dialog_choose_category" />
     </fragment>
     <fragment
         android:id="@+id/nav_profile"
         android:name="ru.skillbranch.skillarticles.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_nav_profile_to_dialog_avatar_actions"
+            app:destination="@id/dialog_avatar_actions" />
+        <action
+            android:id="@+id/action_nav_profile_to_dialog_edit_profile"
+            app:destination="@id/dialog_edit_profile" />
+        <action
+            android:id="@+id/action_logout"
+            app:popUpTo="@id/nav_profile"
+            app:popUpToInclusive="true"
+            app:destination="@id/auth"/>
+    </fragment>
     <fragment
         android:id="@+id/nav_bookmarks"
         android:name="ru.skillbranch.skillarticles.ui.articles.ArticlesFragment"
@@ -70,7 +82,7 @@
             app:destination="@id/page_article" />
         <action
             android:id="@+id/choose_category"
-            app:destination="@id/nav_choose_category" />
+            app:destination="@id/dialog_choose_category" />
     </fragment>
     <fragment
         android:id="@+id/nav_transcriptions"
@@ -78,14 +90,31 @@
         android:label="@string/title_transcriptions"
         tools:layout="@layout/fragment_transcriptions" />
     <dialog
-        android:id="@+id/nav_choose_category"
+        android:id="@+id/dialog_choose_category"
         android:name="ru.skillbranch.skillarticles.ui.dialogs.ChoseCategoryDialog">
         <argument
-            android:name="selectedCategories"
+            android:name="selected_categories"
             app:argType="string[]" />
         <argument
             android:name="categories"
             app:argType="ru.skillbranch.skillarticles.data.local.entities.CategoryData[]" />
+    </dialog>
+    <dialog
+        android:id="@+id/dialog_avatar_actions"
+        android:name="ru.skillbranch.skillarticles.ui.dialogs.AvatarActionDialog">
+        <argument
+            android:name="has_avatar"
+            app:argType="boolean" />
+    </dialog>
+    <dialog
+        android:id="@+id/dialog_edit_profile"
+        android:name="ru.skillbranch.skillarticles.ui.dialogs.EditProfileDialog">
+        <argument
+            android:name="name"
+            app:argType="string" />
+        <argument
+            android:name="about"
+            app:argType="string" />
     </dialog>
 
     <navigation
@@ -97,6 +126,22 @@
             android:name="ru.skillbranch.skillarticles.ui.auth.AuthFragment"
             android:label="@string/title_authorization"
             tools:layout="@layout/fragment_auth">
+
+            <argument
+                android:name="private_destination"
+                android:defaultValue="-1"
+                app:argType="integer" />
+            <action
+                android:id="@+id/action_nav_auth_to_nav_register"
+                app:destination="@id/nav_register" />
+            <action
+                android:id="@+id/action_nav_auth_to_page_privacy_policy"
+                app:destination="@id/page_privacy_policy" />
+        </fragment>
+        <fragment android:id="@+id/nav_register"
+            android:name="ru.skillbranch.skillarticles.ui.auth.RegistrationFragment"
+            tools:layout="@layout/fragment_registration"
+            android:label="@string/title_registration">
 
             <argument
                 android:name="private_destination"
