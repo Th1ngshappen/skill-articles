@@ -23,4 +23,10 @@ Nullam sem sem, rhoncus vitae porttitor et, pretium eu ipsum. Sed semper semper 
     <string name="title_authorization">Authorization</string>
     <string name="title_registration">Registration</string>
     <string name="title_privacy_policy">Privacy policy</string>
+
+    <string name="reg_error_invalid_email">Incorrect email entered</string>
+    <string name="reg_error_invalid_name">The name must be at least 3 characters long and contain only letters, digits, and the \" - \" and \"_ \" symbols</string>
+    <string name="reg_error_invalid_password">The password must be at least 8 characters long and contain only letters and digits</string>
+    <string name="reg_error_mismatching_passwords">"Passwords doesn't match "</string>
+    <string name="reg_error_empty_field">Name, login, password are required fields and must not be empty</string>
 </resources>

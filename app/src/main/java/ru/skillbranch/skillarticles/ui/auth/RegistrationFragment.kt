@@ -8,7 +8,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.savedstate.SavedStateRegistryOwner
 import kotlinx.android.synthetic.main.fragment_registration.*
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.extensions.disableError
 import ru.skillbranch.skillarticles.extensions.getTrimmedString
 import ru.skillbranch.skillarticles.ui.RootActivity
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
@@ -36,51 +35,41 @@ class RegistrationFragment() : BaseFragment<AuthViewModel>() {
 
     private val args: RegistrationFragmentArgs by navArgs()
 
-    private val nameRegex = Regex("^[\\w\\d-_]{3,}$")
-    private val passRegex = Regex("^[\\w\\d]{8,}$")
-
     override fun setupViews() {
 
         btn_register.setOnClickListener {
-
-            validateName()
-            validateLogin()
-            validatePassword()
-            if (areThereInputErrors()) return@setOnClickListener
-
             viewModel.handleRegister(
                 et_name.getTrimmedString(),
                 et_login.getTrimmedString(),
                 et_password.getTrimmedString(),
-                if (args.privateDestination == -1) null else args.privateDestination
+                if (args.privateDestination == -1) null else args.privateDestination,
+                requireContext()
             )
         }
 
-        et_name.doAfterTextChanged { validateName(false) }
-        et_login.doAfterTextChanged { validateLogin(false) }
-        et_password.doAfterTextChanged { validatePassword(false) }
+        et_name.doAfterTextChanged {
+            if (!viewModel.isNameValid(it.toString())) {
+                wrap_name.error = getString(R.string.reg_error_invalid_name)
+            } else wrap_name.error = null
+        }
+
+        et_login.doAfterTextChanged {
+            if (!viewModel.isEmailValid(it.toString())) {
+                wrap_login.error = getString(R.string.reg_error_invalid_email)
+            } else wrap_login.error = null
+        }
+
+        et_password.doAfterTextChanged {
+            if (!viewModel.isPasswordValid(it.toString())) {
+                wrap_password.error = getString(R.string.reg_error_invalid_password)
+            } else wrap_password.error = null
+        }
+
+        et_confirm.doAfterTextChanged {
+            if (et_confirm.text.toString() != et_password.text.toString()) {
+                wrap_confirm.error = getString(R.string.reg_error_mismatching_passwords)
+            } else wrap_confirm.error = null
+        }
 
     }
-
-    private fun validateName(showError: Boolean = true) {
-        if (nameRegex.matches(et_name.text.trim())) wrap_name.disableError()
-        else if (showError) wrap_name.error =
-            "The name must be at least 3 characters long and contain only letters and numbers and can also contain the characters \"-\" and \"_\""
-    }
-
-    private fun validateLogin(showError: Boolean = true) {
-        if (et_login.text.isNotBlank()) wrap_login.disableError()
-        else if (showError) wrap_login.error = "Incorrect Email entered"
-    }
-
-    private fun validatePassword(showError: Boolean = true) {
-        if (passRegex.matches(et_password.text.trim())) wrap_password.disableError()
-        else if (showError) wrap_password.error =
-            "Password must be at least 8 characters long and contain only letters and numbers"
-    }
-
-    private fun areThereInputErrors(): Boolean {
-        return wrap_name.error != null || wrap_login.error != null || wrap_password.error != null
-    }
-
 }
