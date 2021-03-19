@@ -41,7 +41,7 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
     ) {
         if (name.isEmpty() || login.isEmpty() || password.isEmpty()) {
             // showErrorMessage(context.getString(R.string.reg_error_empty_field))
-            showErrorMessage("Name, login, password are required fields and must not be empty")
+            showErrorMessage("Name, login, password it is required fields and not must be empty")
             return
         }
 
