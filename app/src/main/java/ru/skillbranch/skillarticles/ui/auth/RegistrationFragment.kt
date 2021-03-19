@@ -42,8 +42,8 @@ class RegistrationFragment() : BaseFragment<AuthViewModel>() {
                 et_name.getTrimmedString(),
                 et_login.getTrimmedString(),
                 et_password.getTrimmedString(),
-                if (args.privateDestination == -1) null else args.privateDestination,
-                requireContext()
+                if (args.privateDestination == -1) null else args.privateDestination
+                // requireContext()
             )
         }
 

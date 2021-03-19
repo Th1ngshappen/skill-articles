@@ -36,33 +36,37 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
         name: String,
         login: String,
         password: String,
-        dest: Int?,
-        context: Context
+        dest: Int?
+        // context: Context
     ) {
         if (name.isEmpty() || login.isEmpty() || password.isEmpty()) {
-            showErrorMessage(context.getString(R.string.reg_error_empty_field))
+            // showErrorMessage(context.getString(R.string.reg_error_empty_field))
+            showErrorMessage("Name, login, password are required fields and must not be empty")
             return
         }
 
         if (!isNameValid((name))) {
-            showErrorMessage(context.getString(R.string.reg_error_invalid_name))
+            // showErrorMessage(context.getString(R.string.reg_error_invalid_name))
+            showErrorMessage("The name must be at least 3 characters long and contain only letters, digits, and the \" - \" and \"_ \" symbols")
             return
         }
 
         if (!isEmailValid((login))) {
-            showErrorMessage(context.getString(R.string.reg_error_invalid_email))
+            // showErrorMessage(context.getString(R.string.reg_error_invalid_email))
+            showErrorMessage("Incorrect email entered")
             return
         }
 
         if (!isPasswordValid(password)) {
-            showErrorMessage(context.getString(R.string.reg_error_invalid_password))
+            // showErrorMessage(context.getString(R.string.reg_error_invalid_password))
+            showErrorMessage("The password must be at least 8 characters long and contain only letters and digits")
             return
         }
 
-        /*launchSafety {
+        launchSafety {
             repository.register(name, login, password)
             navigate(NavigationCommand.FinishLogin(dest))
-        }*/
+        }
     }
 
     fun isNameValid(name: String): Boolean =
