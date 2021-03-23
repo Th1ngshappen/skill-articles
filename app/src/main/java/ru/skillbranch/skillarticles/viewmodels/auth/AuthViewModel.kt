@@ -47,7 +47,7 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
 
         if (!isNameValid((name))) {
             // showErrorMessage(context.getString(R.string.reg_error_invalid_name))
-            showErrorMessage("The name must be at least 3 characters long and contain only letters, digits, and the \" - \" and \"_ \" symbols")
+            showErrorMessage("The name must be at least 3 characters long and contain only letters and numbers and can also contain the characters \"-\" and \"_\"")
             return
         }
 
