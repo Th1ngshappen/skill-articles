@@ -59,7 +59,7 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
 
         if (!isPasswordValid(password)) {
             // showErrorMessage(context.getString(R.string.reg_error_invalid_password))
-            showErrorMessage("The password must be at least 8 characters long and contain only letters and digits")
+            showErrorMessage("Password must be at least 8 characters long and contain only letters and numbers")
             return
         }
 
