@@ -53,7 +53,7 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
 
         if (!isEmailValid((login))) {
             // showErrorMessage(context.getString(R.string.reg_error_invalid_email))
-            showErrorMessage("Incorrect email entered")
+            showErrorMessage("Incorrect Email entered")
             return
         }
 
