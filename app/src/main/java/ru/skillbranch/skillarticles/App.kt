@@ -2,11 +2,14 @@ package ru.skillbranch.skillarticles
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
-import com.facebook.stetho.Stetho
+import dagger.hilt.android.HiltAndroidApp
 import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.remote.NetworkMonitor
+import javax.inject.Inject
 
+@HiltAndroidApp
 class App : Application() {
 
     companion object {
@@ -18,22 +21,27 @@ class App : Application() {
         }
     }
 
+    @Inject
+    lateinit var monitor: NetworkMonitor
+
+    @Inject
+    lateinit var preferences: PrefManager
+
     init {
         instance = this
+        Log.e("App", "variant: ${BuildConfig.BUILD_TYPE}")
     }
 
     override fun onCreate() {
         super.onCreate()
 
         // start network monitoring
-        NetworkMonitor.registerNetworkMonitor(applicationContext)
+        monitor.registerNetworkMonitor()
 
-        // set default night/day mode
-        val mode = if (PrefManager.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
+        // set saved night/day mode
+        val mode = if (preferences.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
         else AppCompatDelegate.MODE_NIGHT_NO
         AppCompatDelegate.setDefaultNightMode(mode)
-
-        Stetho.initializeWithDefaults(this)
     }
 
 }

@@ -7,19 +7,20 @@ import android.provider.BaseColumns
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.AutoCompleteTextView
-import android.widget.CursorAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.cursoradapter.widget.SimpleCursorAdapter
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.fragment_articles.*
 import kotlinx.android.synthetic.main.search_view_layout.view.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 import ru.skillbranch.skillarticles.data.local.entities.CategoryData
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
@@ -31,16 +32,27 @@ import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesState
 import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Loading
+import javax.inject.Inject
 
-class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
+@AndroidEntryPoint
+class ArticlesFragment : BaseFragment<ArticlesViewModel>(), IArticlesView {
 
-    override val viewModel: ArticlesViewModel by viewModels()
+    override val viewModel: ArticlesViewModel by activityViewModels()
+    // 14: привязываемся к activityViewModels, потому что articles - фрагменты верхнего уровня,
+    // которые живут всегда в активити, и, когда мы переключаемся через navigation меню,
+    // у нас всегда должен быть один и тот же инстанс вью модели
+
     override val layout: Int = R.layout.fragment_articles
     override val binding: ArticlesBinding by lazy { ArticlesBinding() }
     private val args: ArticlesFragmentArgs by navArgs()
-    private lateinit var suggestionAdapter: SimpleCursorAdapter
 
-    override val prepareToolbar: (ToolbarBuilder.() -> Unit)? = {
+    @Inject
+    lateinit var suggestionAdapter: SimpleCursorAdapter
+
+    @Inject
+    lateinit var articlesAdapter: ArticlesAdapter
+
+    override val prepareToolbar: (ToolbarBuilder.() -> Unit) = {
         addMenuItem(
             MenuItemHolder(
                 "Search",
@@ -65,27 +77,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         )
     }
 
-    private val articlesAdapter =
-        ArticlesAdapter { item, isToggleBookmark ->
-
-            if (isToggleBookmark) {
-                viewModel.handleToggleBookmark(item.id)
-            } else {
-                val action = ArticlesFragmentDirections.actionToPageArticle(
-                    item.id,
-                    item.author,
-                    item.authorAvatar!!,
-                    item.category,
-                    item.categoryIcon,
-                    item.date,
-                    item.poster,
-                    item.title
-                )
-
-                viewModel.navigateWithAction(action)
-            }
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -94,14 +85,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             viewModel.applyCategories(bundle[ChoseCategoryDialog.SELECTED_CATEGORIES] as List<String>)
         }
 
-        suggestionAdapter = SimpleCursorAdapter(
-            context,
-            android.R.layout.simple_list_item_1,
-            null, // cursor
-            arrayOf("tag"), // cursor column for bind on view
-            intArrayOf(android.R.id.text1), // text view id for bind data from cursor columns
-            CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
-        )
         suggestionAdapter.setFilterQueryProvider { constraint -> populateAdapter(constraint) }
 
         setHasOptionsMenu(true)
@@ -278,4 +261,27 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         // через bundle (methods saveUI & restoreUi) и то же с вью моделью
     }
 
+    override fun clickArticle(item: ArticleItem, isToggleBookmark: Boolean) {
+        if (isToggleBookmark) {
+            viewModel.handleToggleBookmark(item.id)
+        } else {
+            val action = ArticlesFragmentDirections.actionToPageArticle(
+                item.id,
+                item.author,
+                item.authorAvatar!!,
+                item.category,
+                item.categoryIcon,
+                item.date,
+                item.poster,
+                item.title
+            )
+
+            viewModel.navigateWithAction(action)
+        }
+    }
+
+}
+
+interface IArticlesView {
+    fun clickArticle(item: ArticleItem, isBookmarked: Boolean)
 }

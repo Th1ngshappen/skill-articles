@@ -1,6 +1,7 @@
 package ru.skillbranch.skillarticles.viewmodels.articles
 
-import android.util.Log
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
@@ -16,10 +17,12 @@ import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 import java.util.concurrent.Executors
 
-class ArticlesViewModel(handle: SavedStateHandle) :
+class ArticlesViewModel @ViewModelInject constructor(
+    @Assisted handle: SavedStateHandle,
+    private val repository: ArticlesRepository
+) :
     BaseViewModel<ArticlesState>(handle, ArticlesState()) {
 
-    private val repository = ArticlesRepository
     private var isLoadingInitial = false
     private var isLoadingAfter = false
     private val listConfig by lazy {

@@ -8,17 +8,17 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.extensions.LayoutContainer
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.ui.custom.CommentItemView
+import javax.inject.Inject
 
-class CommentsAdapter(private val listener: (CommentRes) -> Unit) :
+class CommentsAdapter @Inject constructor(val listener: IArticleView) :
     PagedListAdapter<CommentRes, CommentVH>(CommentDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentVH =
-        CommentVH(CommentItemView(parent.context), listener)
+        CommentVH(CommentItemView(parent.context), listener::clickOnComment)
 
     override fun onBindViewHolder(holder: CommentVH, position: Int) {
         holder.bind(getItem(position))
     }
-
 }
 
 // 8: 01:15:50

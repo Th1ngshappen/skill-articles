@@ -2,16 +2,20 @@ package ru.skillbranch.skillarticles.data.repositories
 
 import androidx.lifecycle.LiveData
 import ru.skillbranch.skillarticles.data.local.PrefManager
-import ru.skillbranch.skillarticles.data.remote.NetworkManager
+import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.req.LoginReq
-import ru.skillbranch.skillarticles.data.remote.req.RegisterReq
 import ru.skillbranch.skillarticles.data.remote.res.AuthRes
+import javax.inject.Inject
 
 // 11: 01:48:27
-object RootRepository {
+// 14: 01:39:55 it's a class now not an object, but due to di it'll be singleton
+class RootRepository @Inject constructor(
+    private val preferences: PrefManager,
+    private val network: RestService
+): IRepository {
 
-    private val preferences = PrefManager
-    private val network = NetworkManager.api
+    /*private val preferences = PrefManager(App.applicationContext())
+    private val network = NetworkManager.api*/
 
     fun isAuth(): LiveData<Boolean> = preferences.isAuthLive
 

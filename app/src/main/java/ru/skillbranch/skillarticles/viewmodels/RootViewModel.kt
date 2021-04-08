@@ -1,5 +1,7 @@
 package ru.skillbranch.skillarticles.viewmodels
 
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.local.PrefManager
@@ -7,9 +9,11 @@ import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 
-class RootViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle, RootState()) {
+class RootViewModel @ViewModelInject constructor(
+    @Assisted handle: SavedStateHandle,
+    preferences: PrefManager
+) : BaseViewModel<RootState>(handle, RootState()) {
 
-    private val preferences = PrefManager
     private val privateRoutes = listOf(R.id.nav_profile)
 
     init {

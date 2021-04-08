@@ -8,17 +8,24 @@ import android.net.NetworkRequest
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 
+// 14: 01:48:43 важный момент: мы не можем инжектить в приватное поле
+// (только если это приватное поле конструктора, тогда можем),
+// inject может происходить только в публичные открытые свойства и,
+// соответственно только в публичные методы
+// если вы хотите, чтобы провайды были видны только в каком-то одном модуле,
+// просто не наследуйтесь от этого модуля либо использовать dependency подход
+
 // позволяет определять, есть сеть или нет,
 // а также определять тип сети и наличие соединения в виде LiveData
-object NetworkMonitor {
+class NetworkMonitor(val context: Context) {
     var isConnected: Boolean = false
     val isConnectedLive = MutableLiveData(false)
     val networkTypeLive = MutableLiveData(NetworkType.NONE)
 
-    private lateinit var cm: ConnectivityManager
+    private val cm: ConnectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    fun registerNetworkMonitor(ctx: Context) {
-        cm = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    fun registerNetworkMonitor() {
 
         obtainNetworkType(cm.activeNetwork?.let { cm.getNetworkCapabilities(it) })
             // именно postValue, потому что это будет не главный поток

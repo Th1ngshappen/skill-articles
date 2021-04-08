@@ -8,8 +8,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <!-- 12: 01:48:13 остановилась -->
-
     <!--  android:name=".App" - чтобы App инициализировался самым первым -->
     <application
         android:name=".App"

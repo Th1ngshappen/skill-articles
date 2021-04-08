@@ -3,14 +3,14 @@ ext {
     //
     // Settings -> Inspections -> Lint -> Newer Library Versions Available (search "newer")
     // Analyze -> Run Inspection by Name, search Newer Library Versions Available
-    kotlin_version = "1.3.71"
+    kotlin_version = "1.3.72"
     app_compat_version = "1.2.0"
-    core_ktx_version = "1.3.1"
+    core_ktx_version = "1.3.2"
     coroutines_version = "1.3.9"
-    constraint_version = "2.0.1"
-    navigation_version = "2.3.0"
+    constraint_version = "2.0.4"
+    navigation_version = "2.3.1"
     swiperefreshlayout_version = "1.1.0"
-    gradle_version = "3.6.1"
+    gradle_version = "4.1.0"
     paging_version = "2.1.2"
     lifecycle_version = "2.2.0"
     pref_ktx_version = "1.1.1"
@@ -20,6 +20,9 @@ ext {
     retrofit_version ="2.9.0"
     okhttp_version ="4.8.1"
     moshi_version ="1.9.3"
-    activity_ktx_version="1.2.0-alpha08"
-    fragments_ktx_version="1.3.0-alpha08"
+    activity_ktx_version="1.2.0-beta01"
+    fragments_ktx_version="1.3.0-beta01"
+    dagger_version="2.29.1"
+    hilt_vm_version="1.0.0-alpha02"
+    hilt_version="2.28-alpha"
 }

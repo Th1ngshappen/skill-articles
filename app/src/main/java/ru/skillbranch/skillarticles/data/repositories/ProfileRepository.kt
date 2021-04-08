@@ -4,8 +4,9 @@ import androidx.lifecycle.LiveData
 import okhttp3.MultipartBody
 import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.models.User
-import ru.skillbranch.skillarticles.data.remote.NetworkManager
+import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.req.EditProfileReq
+import javax.inject.Inject
 
 interface IProfileRepository {
     fun getProfile(): LiveData<User?>
@@ -15,11 +16,10 @@ interface IProfileRepository {
     suspend fun editProfile(name: String, about: String)
 }
 
-// 11: репозиторий-object по сути - ленивый singleton, в DI будет по-другому
-object ProfileRepository: IProfileRepository {
-
-    private val prefs = PrefManager
-    private val network = NetworkManager.api
+class ProfileRepository @Inject constructor(
+    private val prefs: PrefManager,
+    private val network: RestService
+) : IProfileRepository {
 
     override fun getProfile(): LiveData<User?> = prefs.profileLive
 
